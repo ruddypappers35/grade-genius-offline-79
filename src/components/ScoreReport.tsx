@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Download, BarChart } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -125,11 +126,13 @@ export const ScoreReport = () => {
       categories.forEach(category => {
         const categoryAssessments = assessments[category.id] || [];
         categoryAssessments.forEach(assessment => {
-          row.push(report.scores[category.id]?.[assessment] || '-');
+          const scoreValue = report.scores[category.id]?.[assessment];
+          row.push(scoreValue !== undefined ? scoreValue.toString() : '-');
         });
-        row.push(report.categoryAverages[category.id] || '-');
+        const avgValue = report.categoryAverages[category.id];
+        row.push(avgValue !== undefined ? avgValue.toString() : '-');
       });
-      row.push(report.weightedAverage);
+      row.push(report.weightedAverage.toString());
       data.push(row);
     });
 
