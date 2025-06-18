@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Plus, Upload, Download, Trash2, Filter } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -66,6 +67,11 @@ export const StudentManagement = () => {
     
     setFormData({ name: "", nis: "", classId: "" });
     setShowForm(false);
+    
+    toast({
+      title: "Siswa Berhasil Ditambahkan",
+      description: `${formData.name} berhasil ditambahkan`,
+    });
   };
 
   const handleDelete = (id: string) => {
@@ -75,15 +81,28 @@ export const StudentManagement = () => {
       
       const studentsToSave = updatedStudents.map(({ className, ...student }) => student);
       localStorage.setItem('students', JSON.stringify(studentsToSave));
+      
+      toast({
+        title: "Siswa Berhasil Dihapus",
+        description: "Data siswa berhasil dihapus",
+      });
     }
   };
 
   const downloadTemplate = () => {
     const templateData = [
       ['nama', 'nis', 'kelas_id'],
-      ['John Doe', '123456', 'copy_class_id_here'],
-      ['Jane Smith', '123457', 'copy_class_id_here']
+      ['Contoh Nama Siswa', '123456789', 'Salin ID kelas dari daftar kelas'],
+      ['', '', '']
     ];
+    
+    // Add available class IDs to template
+    if (classes.length > 0) {
+      templateData.push(['=== ID KELAS YANG TERSEDIA ===', '', '']);
+      classes.forEach(cls => {
+        templateData.push([cls.name, cls.id, '']);
+      });
+    }
     
     const ws = XLSX.utils.aoa_to_sheet(templateData);
     const wb = XLSX.utils.book_new();
@@ -92,13 +111,16 @@ export const StudentManagement = () => {
 
     toast({
       title: "Template Berhasil Diunduh",
-      description: "File template_siswa.xlsx berhasil diunduh",
+      description: "File template_siswa.xlsx berhasil diunduh dengan ID kelas yang tersedia",
     });
   };
 
   const handleImportStudents = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    console.log('Starting import process...');
+    console.log('Available classes:', classes);
 
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -109,32 +131,58 @@ export const StudentManagement = () => {
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-        // Skip header row
-        const studentsData = jsonData.slice(1) as string[][];
+        console.log('Excel data parsed:', jsonData);
+
+        // Skip header row and empty rows
+        const studentsData = jsonData.slice(1).filter((row: any) => 
+          row && row.length >= 3 && row[0] && row[1] && row[2]
+        ) as string[][];
+        
+        console.log('Filtered student data:', studentsData);
         
         let importedCount = 0;
+        let errorCount = 0;
+        const errors: string[] = [];
         const newStudents = [...students];
 
-        studentsData.forEach((row: string[]) => {
-          if (row.length >= 3 && row[0] && row[1] && row[2]) {
-            const [name, nis, classId] = row;
-            
-            // Check if student already exists
-            const existingStudent = newStudents.find(s => s.nis === nis);
-            if (!existingStudent) {
-              const selectedClassData = classes.find(cls => cls.id === classId);
-              if (selectedClassData) {
-                const newStudent: Student = {
-                  id: Date.now().toString() + Math.random(),
-                  name: name.toString(),
-                  nis: nis.toString(),
-                  classId: classId.toString(),
-                  className: selectedClassData.name
-                };
-                newStudents.push(newStudent);
-                importedCount++;
-              }
-            }
+        studentsData.forEach((row: string[], index: number) => {
+          const [name, nis, classId] = row.map(cell => String(cell).trim());
+          
+          console.log(`Processing row ${index + 2}: name=${name}, nis=${nis}, classId=${classId}`);
+          
+          // Check if student already exists
+          const existingStudent = newStudents.find(s => s.nis === nis);
+          if (existingStudent) {
+            console.log(`Student with NIS ${nis} already exists`);
+            errors.push(`Baris ${index + 2}: Siswa dengan NIS ${nis} sudah ada`);
+            errorCount++;
+            return;
+          }
+          
+          // Find matching class - try exact match first, then case-insensitive
+          let selectedClassData = classes.find(cls => cls.id === classId);
+          if (!selectedClassData) {
+            selectedClassData = classes.find(cls => 
+              cls.id.toLowerCase() === classId.toLowerCase() ||
+              cls.name.toLowerCase() === classId.toLowerCase()
+            );
+          }
+          
+          if (selectedClassData) {
+            const newStudent: Student = {
+              id: Date.now().toString() + Math.random().toString(),
+              name: name,
+              nis: nis,
+              classId: selectedClassData.id,
+              className: selectedClassData.name
+            };
+            newStudents.push(newStudent);
+            importedCount++;
+            console.log(`Successfully added student: ${name}`);
+          } else {
+            console.log(`Class not found for classId: ${classId}`);
+            errors.push(`Baris ${index + 2}: Kelas dengan ID "${classId}" tidak ditemukan`);
+            errorCount++;
           }
         });
 
@@ -142,12 +190,25 @@ export const StudentManagement = () => {
         const studentsToSave = newStudents.map(({ className, ...student }) => student);
         localStorage.setItem('students', JSON.stringify(studentsToSave));
 
-        toast({
-          title: "Import Berhasil",
-          description: `${importedCount} siswa berhasil diimport`,
-        });
+        // Show detailed results
+        if (importedCount > 0) {
+          toast({
+            title: "Import Berhasil",
+            description: `${importedCount} siswa berhasil diimport${errorCount > 0 ? `, ${errorCount} gagal` : ''}`,
+          });
+        }
+        
+        if (errorCount > 0) {
+          console.log('Import errors:', errors);
+          toast({
+            title: errorCount === studentsData.length ? "Import Gagal" : "Import Sebagian Berhasil",
+            description: errors.slice(0, 3).join('. ') + (errors.length > 3 ? '...' : ''),
+            variant: "destructive"
+          });
+        }
 
       } catch (error) {
+        console.error('Import error:', error);
         toast({
           title: "Import Gagal",
           description: "File Excel tidak valid atau format salah",
@@ -156,6 +217,9 @@ export const StudentManagement = () => {
       }
     };
     reader.readAsArrayBuffer(file);
+    
+    // Reset file input
+    event.target.value = '';
   };
 
   const filteredStudents = selectedClass === "all" 
@@ -237,6 +301,7 @@ export const StudentManagement = () => {
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="Nama lengkap siswa"
                     className="bg-white/10 border-white/20 text-white placeholder-gray-400"
+                    required
                   />
                 </div>
                 <div>
@@ -247,12 +312,13 @@ export const StudentManagement = () => {
                     onChange={(e) => setFormData({ ...formData, nis: e.target.value })}
                     placeholder="Nomor Induk Siswa"
                     className="bg-white/10 border-white/20 text-white placeholder-gray-400"
+                    required
                   />
                 </div>
               </div>
               <div>
                 <Label htmlFor="class" className="text-gray-300">Kelas</Label>
-                <Select value={formData.classId} onValueChange={(value) => setFormData({ ...formData, classId: value })}>
+                <Select value={formData.classId} onValueChange={(value) => setFormData({ ...formData, classId: value })} required>
                   <SelectTrigger className="bg-white/10 border-white/20 text-white">
                     <SelectValue placeholder="Pilih kelas" />
                   </SelectTrigger>
