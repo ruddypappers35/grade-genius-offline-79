@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Plus, Upload, Download, Trash2, Filter } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import * as XLSX from 'xlsx';
 
 interface Student {
   id: string;
@@ -21,6 +22,7 @@ export const StudentManagement = () => {
   const [showForm, setShowForm] = useState(false);
   const [selectedClass, setSelectedClass] = useState<string>("all");
   const [formData, setFormData] = useState({ name: "", nis: "", classId: "" });
+  const { toast } = useToast();
 
   useEffect(() => {
     loadData();
@@ -77,20 +79,83 @@ export const StudentManagement = () => {
   };
 
   const downloadTemplate = () => {
-    const template = [
+    const templateData = [
       ['nama', 'nis', 'kelas_id'],
       ['John Doe', '123456', 'copy_class_id_here'],
       ['Jane Smith', '123457', 'copy_class_id_here']
     ];
     
-    const csvContent = template.map(row => row.join(',')).join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'template_siswa.csv';
-    a.click();
+    const ws = XLSX.utils.aoa_to_sheet(templateData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Template Siswa");
+    XLSX.writeFile(wb, 'template_siswa.xlsx');
+
+    toast({
+      title: "Template Berhasil Diunduh",
+      description: "File template_siswa.xlsx berhasil diunduh",
+    });
+  };
+
+  const handleImportStudents = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target?.result as ArrayBuffer);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+        // Skip header row
+        const studentsData = jsonData.slice(1) as string[][];
+        
+        let importedCount = 0;
+        const newStudents = [...students];
+
+        studentsData.forEach((row: string[]) => {
+          if (row.length >= 3 && row[0] && row[1] && row[2]) {
+            const [name, nis, classId] = row;
+            
+            // Check if student already exists
+            const existingStudent = newStudents.find(s => s.nis === nis);
+            if (!existingStudent) {
+              const selectedClassData = classes.find(cls => cls.id === classId);
+              if (selectedClassData) {
+                const newStudent: Student = {
+                  id: Date.now().toString() + Math.random(),
+                  name: name.toString(),
+                  nis: nis.toString(),
+                  classId: classId.toString(),
+                  className: selectedClassData.name
+                };
+                newStudents.push(newStudent);
+                importedCount++;
+              }
+            }
+          }
+        });
+
+        setStudents(newStudents);
+        const studentsToSave = newStudents.map(({ className, ...student }) => student);
+        localStorage.setItem('students', JSON.stringify(studentsToSave));
+
+        toast({
+          title: "Import Berhasil",
+          description: `${importedCount} siswa berhasil diimport`,
+        });
+
+      } catch (error) {
+        toast({
+          title: "Import Gagal",
+          description: "File Excel tidak valid atau format salah",
+          variant: "destructive"
+        });
+      }
+    };
+    reader.readAsArrayBuffer(file);
   };
 
   const filteredStudents = selectedClass === "all" 
@@ -113,8 +178,24 @@ export const StudentManagement = () => {
             className="border-white/20 text-gray-300 hover:bg-white/10"
           >
             <Download size={16} className="mr-2" />
-            Template
+            Template Excel
           </Button>
+          <div>
+            <input
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={handleImportStudents}
+              className="hidden"
+              id="import-students"
+            />
+            <Button
+              onClick={() => document.getElementById('import-students')?.click()}
+              className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+            >
+              <Upload size={16} className="mr-2" />
+              Import Excel
+            </Button>
+          </div>
           <Button
             onClick={() => setShowForm(!showForm)}
             className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"

@@ -1,15 +1,16 @@
-
 import { useState, useEffect } from "react";
 import { Download, BarChart } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import * as XLSX from 'xlsx';
 
 interface StudentReport {
   id: string;
   name: string;
   nis: string;
-  scores: { [categoryId: string]: number };
+  scores: { [categoryId: string]: { [assessmentName: string]: number } };
+  categoryAverages: { [categoryId: string]: number };
   weightedAverage: number;
 }
 
@@ -18,6 +19,7 @@ export const ScoreReport = () => {
   const [classes, setClasses] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [weights, setWeights] = useState<any[]>([]);
+  const [assessments, setAssessments] = useState<{ [categoryId: string]: string[] }>({});
   const [selectedClass, setSelectedClass] = useState<string>("");
 
   useEffect(() => {
@@ -34,10 +36,12 @@ export const ScoreReport = () => {
     const savedClasses = JSON.parse(localStorage.getItem('classes') || '[]');
     const savedCategories = JSON.parse(localStorage.getItem('categories') || '[]');
     const savedWeights = JSON.parse(localStorage.getItem('weights') || '[]');
+    const savedAssessments = JSON.parse(localStorage.getItem('assessments') || '{}');
     
     setClasses(savedClasses);
     setCategories(savedCategories);
     setWeights(savedWeights);
+    setAssessments(savedAssessments);
   };
 
   const generateReport = () => {
@@ -47,18 +51,33 @@ export const ScoreReport = () => {
     const classStudents = students.filter((student: any) => student.classId === selectedClass);
     
     const studentReports: StudentReport[] = classStudents.map((student: any) => {
-      const studentScores: { [categoryId: string]: number } = {};
+      const studentScores: { [categoryId: string]: { [assessmentName: string]: number } } = {};
+      const categoryAverages: { [categoryId: string]: number } = {};
       let weightedSum = 0;
       let totalWeight = 0;
 
       categories.forEach(category => {
-        const score = scores.find((s: any) => s.studentId === student.id && s.categoryId === category.id);
-        if (score) {
-          studentScores[category.id] = score.value;
-          
+        const categoryScores = scores.filter((s: any) => 
+          s.studentId === student.id && s.categoryId === category.id
+        );
+        
+        if (categoryScores.length > 0) {
+          studentScores[category.id] = {};
+          let categorySum = 0;
+          let categoryCount = 0;
+
+          categoryScores.forEach((score: any) => {
+            studentScores[category.id][score.assessmentName] = score.value;
+            categorySum += score.value;
+            categoryCount++;
+          });
+
+          const categoryAverage = categoryCount > 0 ? Math.round(categorySum / categoryCount) : 0;
+          categoryAverages[category.id] = categoryAverage;
+
           const weight = weights.find((w: any) => w.categoryId === category.id);
           if (weight) {
-            weightedSum += score.value * (weight.weight / 100);
+            weightedSum += categoryAverage * (weight.weight / 100);
             totalWeight += weight.weight;
           }
         }
@@ -71,6 +90,7 @@ export const ScoreReport = () => {
         name: student.name,
         nis: student.nis,
         scores: studentScores,
+        categoryAverages,
         weightedAverage
       };
     });
@@ -78,36 +98,45 @@ export const ScoreReport = () => {
     setReports(studentReports);
   };
 
-  const exportToCSV = () => {
+  const exportToExcel = () => {
     if (reports.length === 0) return;
 
     const selectedClassName = classes.find(c => c.id === selectedClass)?.name || 'Unknown';
     
-    // Header
-    let csvContent = `Laporan Nilai Kelas ${selectedClassName}\n\n`;
-    csvContent += 'Nama,NIS,';
+    const data = [
+      ['Laporan Nilai Kelas ' + selectedClassName]
+    ];
     
-    // Add category headers
+    // Header row
+    const headerRow = ['Nama', 'NIS'];
     categories.forEach(category => {
-      csvContent += `${category.name},`;
+      const categoryAssessments = assessments[category.id] || [];
+      categoryAssessments.forEach(assessment => {
+        headerRow.push(`${category.name} - ${assessment}`);
+      });
+      headerRow.push(`Rata-rata ${category.name}`);
     });
-    csvContent += 'Rata-rata Berbobot\n';
+    headerRow.push('Rata-rata Berbobot');
+    data.push(headerRow);
 
     // Data rows
     reports.forEach(report => {
-      csvContent += `${report.name},${report.nis},`;
+      const row = [report.name, report.nis];
       categories.forEach(category => {
-        csvContent += `${report.scores[category.id] || '-'},`;
+        const categoryAssessments = assessments[category.id] || [];
+        categoryAssessments.forEach(assessment => {
+          row.push(report.scores[category.id]?.[assessment] || '-');
+        });
+        row.push(report.categoryAverages[category.id] || '-');
       });
-      csvContent += `${report.weightedAverage}\n`;
+      row.push(report.weightedAverage);
+      data.push(row);
     });
 
-    // Download
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `laporan_nilai_${selectedClassName.replace(/\s+/g, '_')}.csv`;
-    link.click();
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Laporan Nilai");
+    XLSX.writeFile(wb, `laporan_nilai_${selectedClassName.replace(/\s+/g, '_')}.xlsx`);
   };
 
   return (
@@ -117,11 +146,11 @@ export const ScoreReport = () => {
           <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
             Rekap Nilai
           </h1>
-          <p className="text-gray-400">View and export score reports by class</p>
+          <p className="text-gray-400">View and export detailed score reports by class</p>
         </div>
         {reports.length > 0 && (
           <Button
-            onClick={exportToCSV}
+            onClick={exportToExcel}
             className="bg-gradient-to-r from-green-500 to-emerald-500"
           >
             <Download size={16} className="mr-2" />
@@ -177,7 +206,7 @@ export const ScoreReport = () => {
                       <td className="py-3 px-4 text-gray-300">{report.nis}</td>
                       {categories.map(category => (
                         <td key={category.id} className="py-3 px-4 text-center text-gray-300">
-                          {report.scores[category.id] || '-'}
+                          {report.categoryAverages[category.id] || '-'}
                         </td>
                       ))}
                       <td className="py-3 px-4 text-center font-bold">

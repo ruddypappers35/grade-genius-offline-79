@@ -1,9 +1,9 @@
-
 import { useState } from "react";
 import { Download, Upload, Trash2, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import * as XLSX from 'xlsx';
 
 export const DataManagement = () => {
   const [isResetting, setIsResetting] = useState(false);
@@ -106,21 +106,23 @@ export const DataManagement = () => {
     const students = JSON.parse(localStorage.getItem('students') || '[]');
     const classes = JSON.parse(localStorage.getItem('classes') || '[]');
     
-    let csvContent = 'Nama,NIS,Kelas\n';
+    const data = [
+      ['Nama', 'NIS', 'Kelas']
+    ];
+    
     students.forEach((student: any) => {
       const className = classes.find((cls: any) => cls.id === student.classId)?.name || 'Unknown';
-      csvContent += `${student.name},${student.nis},${className}\n`;
+      data.push([student.name, student.nis, className]);
     });
 
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'daftar_siswa.csv';
-    link.click();
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Data Siswa");
+    XLSX.writeFile(wb, 'daftar_siswa.xlsx');
 
     toast({
       title: "Export Berhasil",
-      description: "Data siswa berhasil diexport",
+      description: "Data siswa berhasil diexport ke Excel",
     });
   };
 
@@ -129,24 +131,26 @@ export const DataManagement = () => {
     const students = JSON.parse(localStorage.getItem('students') || '[]');
     const categories = JSON.parse(localStorage.getItem('categories') || '[]');
     
-    let csvContent = 'Nama Siswa,NIS,Kategori,Nilai\n';
+    const data = [
+      ['Nama Siswa', 'NIS', 'Kategori', 'Penilaian', 'Nilai']
+    ];
+    
     scores.forEach((score: any) => {
       const student = students.find((s: any) => s.id === score.studentId);
       const category = categories.find((c: any) => c.id === score.categoryId);
       if (student && category) {
-        csvContent += `${student.name},${student.nis},${category.name},${score.value}\n`;
+        data.push([student.name, student.nis, category.name, score.assessmentName || 'Default', score.value]);
       }
     });
 
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'data_nilai.csv';
-    link.click();
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Data Nilai");
+    XLSX.writeFile(wb, 'data_nilai.xlsx');
 
     toast({
       title: "Export Berhasil",
-      description: "Data nilai berhasil diexport",
+      description: "Data nilai berhasil diexport ke Excel",
     });
   };
 
