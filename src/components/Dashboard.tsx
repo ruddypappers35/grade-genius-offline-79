@@ -1,12 +1,13 @@
 
 import { useState, useEffect } from "react";
-import { GraduationCap, Users, Tag, BarChart } from "lucide-react";
+import { GraduationCap, Users, Tag, BarChart, BookOpen } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const Dashboard = () => {
   const [stats, setStats] = useState({
     totalClasses: 0,
     totalStudents: 0,
+    totalSubjects: 0,
     totalCategories: 0,
     averageScore: 0
   });
@@ -15,6 +16,7 @@ export const Dashboard = () => {
     // Load stats from localStorage
     const classes = JSON.parse(localStorage.getItem('classes') || '[]');
     const students = JSON.parse(localStorage.getItem('students') || '[]');
+    const subjects = JSON.parse(localStorage.getItem('subjects') || '[]');
     const categories = JSON.parse(localStorage.getItem('categories') || '[]');
     const scores = JSON.parse(localStorage.getItem('scores') || '[]');
 
@@ -25,6 +27,7 @@ export const Dashboard = () => {
     setStats({
       totalClasses: classes.length,
       totalStudents: students.length,
+      totalSubjects: subjects.length,
       totalCategories: categories.length,
       averageScore
     });
@@ -42,6 +45,12 @@ export const Dashboard = () => {
       value: stats.totalStudents,
       icon: Users,
       color: "from-purple-500 to-pink-500"
+    },
+    {
+      title: "Mata Pelajaran",
+      value: stats.totalSubjects,
+      icon: BookOpen,
+      color: "from-indigo-500 to-blue-500"
     },
     {
       title: "Kategori Nilai",
@@ -66,7 +75,7 @@ export const Dashboard = () => {
         <p className="text-gray-400">Selamat datang di sistem manajemen nilai siswa</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
         {statCards.map((card, index) => (
           <Card key={index} className="bg-black/20 backdrop-blur-lg border-white/10 hover:border-white/20 transition-all duration-300 group">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
