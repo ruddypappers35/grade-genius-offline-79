@@ -1,7 +1,7 @@
-
 import { useState, useEffect } from "react";
-import { GraduationCap, Users, Tag, BarChart, BookOpen } from "lucide-react";
+import { GraduationCap, Users, Tag, BarChart, BookOpen, Download } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -11,6 +11,9 @@ export const Dashboard = () => {
     totalCategories: 0,
     averageScore: 0
   });
+
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showInstallButton, setShowInstallButton] = useState(false);
 
   useEffect(() => {
     // Load stats from localStorage
@@ -31,7 +34,49 @@ export const Dashboard = () => {
       totalCategories: categories.length,
       averageScore
     });
+
+    // PWA install prompt handler
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallButton(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    // Check if app is already installed
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+    const isInWebAppiOS = (window.navigator as any).standalone === true;
+    
+    if (!isStandalone && !isInWebAppiOS) {
+      setShowInstallButton(true);
+    }
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
   }, []);
+
+  const handleInstallClick = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      
+      if (outcome === 'accepted') {
+        setShowInstallButton(false);
+      }
+      
+      setDeferredPrompt(null);
+    } else {
+      // Fallback for browsers that don't support the install prompt
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      if (isIOS) {
+        alert('Untuk menginstal aplikasi di iOS: Tekan tombol Share, lalu pilih "Add to Home Screen"');
+      } else {
+        alert('Untuk menginstal aplikasi: Buka menu browser Anda dan pilih "Install App" atau "Add to Home Screen"');
+      }
+    }
+  };
 
   const statCards = [
     {
@@ -73,13 +118,25 @@ export const Dashboard = () => {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
-      <div className="text-center sm:text-left">
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 text-gray-900">
-          Dashboard
-        </h1>
-        <p className="text-gray-600 text-sm sm:text-base">
-          Selamat datang di sistem manajemen nilai siswa
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div className="text-center sm:text-left mb-4 sm:mb-0">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 text-gray-900">
+            Dashboard
+          </h1>
+          <p className="text-gray-600 text-sm sm:text-base">
+            Selamat datang di sistem manajemen nilai siswa
+          </p>
+        </div>
+        
+        {showInstallButton && (
+          <Button
+            onClick={handleInstallClick}
+            className="bg-blue-500 hover:bg-blue-600 text-white flex items-center space-x-2"
+          >
+            <Download size={16} />
+            <span>Instal Aplikasi</span>
+          </Button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
