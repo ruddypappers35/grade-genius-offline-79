@@ -22,15 +22,15 @@ interface SidebarProps {
 
 export const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
   const menuItems = [
-    { icon: Home, label: "Dashboard", path: "/", gradient: "fresh-gradient-blue" },
-    { icon: GraduationCap, label: "Kelas", path: "/classes", gradient: "fresh-gradient-purple" },
-    { icon: Users, label: "Siswa", path: "/students", gradient: "fresh-gradient-green" },
-    { icon: BookOpen, label: "Mata Pelajaran", path: "/subjects", gradient: "fresh-gradient-orange" },
-    { icon: Tag, label: "Kategori", path: "/categories", gradient: "fresh-gradient-blue" },
-    { icon: Scale, label: "Bobot", path: "/weights", gradient: "fresh-gradient-purple" },
-    { icon: FileText, label: "Input Nilai", path: "/scores", gradient: "fresh-gradient-green" },
-    { icon: BarChart3, label: "Rekap Nilai", path: "/reports", gradient: "fresh-gradient-orange" },
-    { icon: Database, label: "Data", path: "/data", gradient: "fresh-gradient-blue" },
+    { icon: Home, label: "Dashboard", path: "/", color: "bg-gray-600" },
+    { icon: GraduationCap, label: "Kelas", path: "/classes", color: "bg-blue-600" },
+    { icon: Users, label: "Siswa", path: "/students", color: "bg-green-600" },
+    { icon: BookOpen, label: "Mata Pelajaran", path: "/subjects", color: "bg-orange-600" },
+    { icon: Tag, label: "Kategori", path: "/categories", color: "bg-gray-600" },
+    { icon: Scale, label: "Bobot", path: "/weights", color: "bg-blue-600" },
+    { icon: FileText, label: "Input Nilai", path: "/scores", color: "bg-green-600" },
+    { icon: BarChart3, label: "Rekap Nilai", path: "/reports", color: "bg-orange-600" },
+    { icon: Database, label: "Data", path: "/data", color: "bg-gray-600" },
   ];
 
   return (
@@ -53,16 +53,16 @@ export const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
       `}>
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-border/50">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 fresh-gradient-purple rounded-xl flex items-center justify-center shadow-lg">
-              <GraduationCap size={18} className="text-white" />
+            <div className="w-8 h-8 bg-gray-700 dark:bg-gray-300 rounded-lg flex items-center justify-center shadow-sm">
+              <GraduationCap size={18} className="text-white dark:text-gray-700" />
             </div>
-            <h2 className="text-lg sm:text-xl font-bold text-gradient">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">
               Sistem Nilai
             </h2>
           </div>
           <button
             onClick={onToggle}
-            className="lg:hidden p-2 rounded-xl hover:bg-primary/10 transition-colors duration-200"
+            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
           >
             <X size={20} className="text-foreground" />
           </button>
@@ -75,10 +75,10 @@ export const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
                 <NavLink
                   to={item.path}
                   className={({ isActive }) =>
-                    `flex items-center space-x-3 px-3 sm:px-4 py-3 sm:py-3.5 rounded-xl transition-all duration-200 group ${
+                    `flex items-center space-x-3 px-3 sm:px-4 py-3 sm:py-3.5 rounded-lg transition-all duration-200 group ${
                       isActive
-                        ? "bg-primary/10 text-primary font-medium shadow-sm border border-primary/20"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                        ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-medium shadow-sm"
+                        : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800/50"
                     }`
                   }
                   onClick={() => {
@@ -87,7 +87,7 @@ export const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
                     }
                   }}
                 >
-                  <div className={`p-2 rounded-lg ${item.gradient} shadow-sm group-hover:shadow-md transition-shadow duration-200`}>
+                  <div className={`p-2 rounded-lg ${item.color} shadow-sm`}>
                     <item.icon size={16} className="text-white" />
                   </div>
                   <span className="font-medium text-sm sm:text-base">{item.label}</span>
