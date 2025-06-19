@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Plus, Trash2, Tag, Edit } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -148,7 +147,7 @@ export const CategoryManagement = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {categories.map((category) => (
-          <Card key={category.id} className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-300 group">
+          <Card key={category.id} className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-300">
             <CardHeader className="pb-3">
               <div className="flex justify-between items-start">
                 <div className="flex items-center space-x-2">
@@ -162,7 +161,7 @@ export const CategoryManagement = () => {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleEdit(category)}
-                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                   >
                     <Edit size={16} />
                   </Button>
@@ -170,7 +169,7 @@ export const CategoryManagement = () => {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleDelete(category.id)}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
                   >
                     <Trash2 size={16} />
                   </Button>
