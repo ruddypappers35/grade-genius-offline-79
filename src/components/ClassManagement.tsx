@@ -70,14 +70,14 @@ export const ClassManagement = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold mb-2 text-gray-900">
             Kelola Kelas
           </h1>
-          <p className="text-gray-400">Manage your classes and class teachers</p>
+          <p className="text-gray-600">Manage your classes and class teachers</p>
         </div>
         <Button
           onClick={() => setShowForm(!showForm)}
-          className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+          className="bg-blue-600 hover:bg-blue-700 text-white"
         >
           <Plus size={16} className="mr-2" />
           Tambah Kelas
@@ -85,41 +85,41 @@ export const ClassManagement = () => {
       </div>
 
       {showForm && (
-        <Card className="bg-black/20 backdrop-blur-lg border-white/10">
+        <Card className="bg-white border border-gray-200 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-white">Tambah Kelas Baru</CardTitle>
+            <CardTitle className="text-gray-900">Tambah Kelas Baru</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="className" className="text-gray-300">Nama Kelas</Label>
+                <Label htmlFor="className" className="text-gray-700">Nama Kelas</Label>
                 <Input
                   id="className"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="contoh: XII IPA 1"
-                  className="bg-white/10 border-white/20 text-white placeholder-gray-400"
+                  className="bg-white border-gray-300 text-gray-900 placeholder-gray-500"
                 />
               </div>
               <div>
-                <Label htmlFor="teacher" className="text-gray-300">Wali Kelas</Label>
+                <Label htmlFor="teacher" className="text-gray-700">Wali Kelas</Label>
                 <Input
                   id="teacher"
                   value={formData.teacher}
                   onChange={(e) => setFormData({ ...formData, teacher: e.target.value })}
                   placeholder="Nama wali kelas"
-                  className="bg-white/10 border-white/20 text-white placeholder-gray-400"
+                  className="bg-white border-gray-300 text-gray-900 placeholder-gray-500"
                 />
               </div>
               <div className="flex space-x-2">
-                <Button type="submit" className="bg-gradient-to-r from-green-500 to-emerald-500">
+                <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white">
                   Simpan
                 </Button>
                 <Button 
                   type="button" 
                   variant="outline" 
                   onClick={() => setShowForm(false)}
-                  className="border-white/20 text-gray-300 hover:bg-white/10"
+                  className="border-gray-300 text-gray-700 hover:bg-gray-50"
                 >
                   Batal
                 </Button>
@@ -131,25 +131,25 @@ export const ClassManagement = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {classes.map((cls) => (
-          <Card key={cls.id} className="bg-black/20 backdrop-blur-lg border-white/10 hover:border-white/20 transition-all duration-300 group">
+          <Card key={cls.id} className="bg-white border border-gray-200 shadow-sm hover:border-gray-300 transition-all duration-300">
             <CardHeader className="pb-3">
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="text-white text-lg">{cls.name}</CardTitle>
-                  <p className="text-gray-400 text-sm mt-1">Wali: {cls.teacher}</p>
+                  <CardTitle className="text-gray-900 text-lg">{cls.name}</CardTitle>
+                  <p className="text-gray-600 text-sm mt-1">Wali: {cls.teacher}</p>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => handleDelete(cls.id)}
-                  className="text-red-400 hover:text-red-300 hover:bg-red-500/20"
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
                 >
                   <Trash2 size={16} />
                 </Button>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center space-x-2 text-blue-400">
+              <div className="flex items-center space-x-2 text-blue-600">
                 <Users size={16} />
                 <span className="text-sm">{cls.studentCount} siswa</span>
               </div>
@@ -160,8 +160,8 @@ export const ClassManagement = () => {
 
       {classes.length === 0 && (
         <div className="text-center py-12">
-          <GraduationCap size={48} className="mx-auto text-gray-500 mb-4" />
-          <p className="text-gray-400">Belum ada kelas. Tambah kelas pertama Anda!</p>
+          <GraduationCap size={48} className="mx-auto text-gray-400 mb-4" />
+          <p className="text-gray-600">Belum ada kelas. Tambah kelas pertama Anda!</p>
         </div>
       )}
     </div>
