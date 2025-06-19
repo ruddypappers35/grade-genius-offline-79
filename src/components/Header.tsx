@@ -45,7 +45,7 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-500 rounded-full flex items-center justify-center shadow-sm">
               <User size={16} className="text-white" />
             </div>
-            <span className="hidden md:block text-sm font-medium text-gray-900">Admin</span>
+            <span className="hidden md:block text-sm font-medium text-gray-900">Guru</span>
           </div>
         </div>
       </div>
