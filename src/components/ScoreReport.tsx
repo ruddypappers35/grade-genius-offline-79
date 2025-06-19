@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Download, BarChart } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -116,7 +117,7 @@ export const ScoreReport = () => {
     ];
     
     // Header row
-    const headerRow = ['No', 'Nama', 'NIS'];
+    const headerRow = ['Nama', 'NIS'];
     categories.forEach(category => {
       subjects.forEach(subject => {
         const categorySubjectAssessments = assessments[category.id]?.[subject.id] || [];
@@ -130,8 +131,8 @@ export const ScoreReport = () => {
     data.push(headerRow);
 
     // Data rows
-    reports.forEach((report, index) => {
-      const row = [index + 1, report.name, report.nis];
+    reports.forEach(report => {
+      const row = [report.name, report.nis];
       categories.forEach(category => {
         subjects.forEach(subject => {
           const categorySubjectAssessments = assessments[category.id]?.[subject.id] || [];
@@ -194,21 +195,15 @@ export const ScoreReport = () => {
       {selectedClass && reports.length > 0 && (
         <Card className="bg-white border border-gray-200 shadow-sm">
           <CardHeader>
-            <div className="flex justify-between items-center">
-              <CardTitle className="text-gray-900">
-                Laporan Nilai - {classes.find(c => c.id === selectedClass)?.name}
-              </CardTitle>
-              <div className="text-sm text-gray-600">
-                Total: {reports.length} siswa
-              </div>
-            </div>
+            <CardTitle className="text-gray-900">
+              Laporan Nilai - {classes.find(c => c.id === selectedClass)?.name}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 text-gray-900 font-semibold">No</th>
                     <th className="text-left py-3 px-4 text-gray-900 font-semibold">Nama</th>
                     <th className="text-left py-3 px-4 text-gray-900 font-semibold">NIS</th>
                     {categories.map(category => 
@@ -232,9 +227,8 @@ export const ScoreReport = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {reports.map((report, index) => (
+                  {reports.map((report) => (
                     <tr key={report.id} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="py-3 px-4 text-gray-600">{index + 1}</td>
                       <td className="py-3 px-4 text-gray-900 font-medium">{report.name}</td>
                       <td className="py-3 px-4 text-gray-600">{report.nis}</td>
                       {categories.map(category => 

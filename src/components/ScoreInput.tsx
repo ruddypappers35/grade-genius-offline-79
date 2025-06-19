@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Save, Edit, Plus, Trash2, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -355,12 +356,9 @@ export const ScoreInput = () => {
         <Card className="bg-white border border-gray-200 shadow-sm">
           <CardHeader>
             <div className="flex justify-between items-center">
-              <div>
-                <CardTitle className="text-gray-900">
-                  Input Nilai - {classes.find(c => c.id === selectedClass)?.name} - {subjects.find(s => s.id === selectedSubject)?.name} - {categories.find(c => c.id === selectedCategory)?.name} - {selectedAssessment}
-                </CardTitle>
-                <p className="text-gray-600 text-sm mt-1">Total: {filteredStudents.length} siswa</p>
-              </div>
+              <CardTitle className="text-gray-900">
+                Input Nilai - {classes.find(c => c.id === selectedClass)?.name} - {subjects.find(s => s.id === selectedSubject)?.name} - {categories.find(c => c.id === selectedCategory)?.name} - {selectedAssessment}
+              </CardTitle>
               {hasUnsavedChanges && (
                 <Button
                   onClick={handleSaveAll}
@@ -374,21 +372,16 @@ export const ScoreInput = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {filteredStudents.map((student, index) => {
+              {filteredStudents.map((student) => {
                 const key = `${student.id}-${selectedCategory}-${selectedSubject}-${selectedAssessment}`;
                 const currentValue = scoreInputs[key] ?? getExistingScore(student.id, selectedCategory, selectedSubject, selectedAssessment);
                 const hasUnsavedChanges = scoreInputs[key] !== undefined;
                 
                 return (
                   <div key={student.id} className="flex items-center justify-between p-4 rounded-lg bg-gray-50 border border-gray-200">
-                    <div className="flex items-center space-x-4">
-                      <div className="text-gray-500 text-sm font-medium w-8">
-                        {index + 1}.
-                      </div>
-                      <div>
-                        <h3 className="text-gray-900 font-medium">{student.name}</h3>
-                        <p className="text-gray-600 text-sm">NIS: {student.nis}</p>
-                      </div>
+                    <div>
+                      <h3 className="text-gray-900 font-medium">{student.name}</h3>
+                      <p className="text-gray-600 text-sm">NIS: {student.nis}</p>
                     </div>
                     <div className="flex items-center space-x-3">
                       <Input

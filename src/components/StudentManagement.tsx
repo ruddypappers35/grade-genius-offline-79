@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, User, Download, Upload, Search } from "lucide-react";
+import { Plus, Edit, Trash2, User, Download, Upload } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import * as XLSX from 'xlsx';
@@ -28,8 +27,6 @@ export const StudentManagement = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({ name: "", nis: "", classId: "" });
-  const [searchName, setSearchName] = useState("");
-  const [filterClass, setFilterClass] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -47,22 +44,6 @@ export const StudentManagement = () => {
     
     setStudents(studentsWithClass);
     setClasses(savedClasses);
-  };
-
-  const getFilteredStudents = () => {
-    let filtered = students;
-    
-    if (filterClass) {
-      filtered = filtered.filter(student => student.classId === filterClass);
-    }
-    
-    if (searchName.trim()) {
-      filtered = filtered.filter(student => 
-        student.name.toLowerCase().includes(searchName.toLowerCase())
-      );
-    }
-    
-    return filtered;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -229,8 +210,6 @@ export const StudentManagement = () => {
     event.target.value = '';
   };
 
-  const filteredStudents = getFilteredStudents();
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -344,45 +323,13 @@ export const StudentManagement = () => {
 
       <Card className="bg-white border border-gray-200 shadow-sm">
         <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle className="text-gray-900">Daftar Siswa</CardTitle>
-            <div className="text-sm text-gray-600">
-              Total: {filteredStudents.length} siswa
-            </div>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-4 mt-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <Input
-                  placeholder="Cari nama siswa..."
-                  value={searchName}
-                  onChange={(e) => setSearchName(e.target.value)}
-                  className="pl-10 bg-white border-gray-300 text-gray-900"
-                />
-              </div>
-            </div>
-            <div className="w-full sm:w-48">
-              <Select value={filterClass} onValueChange={setFilterClass}>
-                <SelectTrigger className="bg-white border-gray-300 text-gray-900">
-                  <SelectValue placeholder="Filter kelas" />
-                </SelectTrigger>
-                <SelectContent className="bg-white border-gray-200">
-                  <SelectItem value="" className="text-gray-900">Semua Kelas</SelectItem>
-                  {classes.map((cls) => (
-                    <SelectItem key={cls.id} value={cls.id} className="text-gray-900">{cls.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          <CardTitle className="text-gray-900">Daftar Siswa</CardTitle>
         </CardHeader>
         <CardContent>
-          {filteredStudents.length > 0 ? (
+          {students.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-gray-900 w-16">No</TableHead>
                   <TableHead className="text-gray-900">Nama</TableHead>
                   <TableHead className="text-gray-900">NIS</TableHead>
                   <TableHead className="text-gray-900">Kelas</TableHead>
@@ -390,9 +337,8 @@ export const StudentManagement = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredStudents.map((student, index) => (
+                {students.map((student) => (
                   <TableRow key={student.id}>
-                    <TableCell className="text-gray-600">{index + 1}</TableCell>
                     <TableCell className="text-gray-900 font-medium">{student.name}</TableCell>
                     <TableCell className="text-gray-600">{student.nis}</TableCell>
                     <TableCell className="text-gray-600">{student.className}</TableCell>
@@ -423,9 +369,7 @@ export const StudentManagement = () => {
           ) : (
             <div className="text-center py-12">
               <User size={48} className="mx-auto text-gray-400 mb-4" />
-              <p className="text-gray-600">
-                {searchName || filterClass ? 'Tidak ada siswa yang sesuai dengan filter' : 'Belum ada siswa. Tambah siswa pertama Anda!'}
-              </p>
+              <p className="text-gray-600">Belum ada siswa. Tambah siswa pertama Anda!</p>
             </div>
           )}
         </CardContent>
