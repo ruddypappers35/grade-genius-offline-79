@@ -17,7 +17,7 @@ const Index = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 text-foreground flex flex-col">
+    <div className="min-h-screen bg-gray-50 text-gray-900 flex flex-col">
       <div className="flex flex-1">
         <Sidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
         
@@ -38,9 +38,9 @@ const Index = () => {
             </Routes>
           </main>
           
-          <footer className="mt-auto p-4 border-t border-border/50 text-center">
-            <p className="text-gray-600 dark:text-gray-400 text-sm">
-              Developed by <span className="text-gray-900 dark:text-gray-100 font-medium">Rudy Susanto</span>
+          <footer className="mt-auto p-4 border-t border-gray-200 text-center bg-white">
+            <p className="text-gray-600 text-sm">
+              Developed by <span className="text-gray-900 font-medium">Rudy Susanto</span>
             </p>
           </footer>
         </div>

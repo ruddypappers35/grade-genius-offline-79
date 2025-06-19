@@ -216,82 +216,82 @@ export const ScoreInput = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-gray-900">
           Input Nilai
         </h1>
-        <p className="text-gray-400">Input scores for students by class, subject, category and assessment</p>
+        <p className="text-gray-600">Input nilai siswa berdasarkan kelas, mata pelajaran, kategori dan penilaian</p>
       </div>
 
-      <Card className="bg-black/20 backdrop-blur-lg border-white/10">
+      <Card className="bg-white border border-gray-200 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-white">Filter</CardTitle>
+          <CardTitle className="text-gray-900">Filter Data</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <label className="text-gray-300 text-sm mb-2 block">Pilih Kelas</label>
+              <label className="text-gray-700 text-sm mb-2 block font-medium">Pilih Kelas</label>
               <Select value={selectedClass} onValueChange={setSelectedClass}>
-                <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                <SelectTrigger className="bg-white border-gray-300 text-gray-900">
                   <SelectValue placeholder="Pilih kelas" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-white/20">
+                <SelectContent className="bg-white border-gray-200 z-50">
                   {classes.map((cls) => (
-                    <SelectItem key={cls.id} value={cls.id}>{cls.name}</SelectItem>
+                    <SelectItem key={cls.id} value={cls.id} className="text-gray-900 hover:bg-gray-50">{cls.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <label className="text-gray-300 text-sm mb-2 block">Pilih Mata Pelajaran</label>
+              <label className="text-gray-700 text-sm mb-2 block font-medium">Pilih Mata Pelajaran</label>
               <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-                <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                <SelectTrigger className="bg-white border-gray-300 text-gray-900">
                   <SelectValue placeholder="Pilih mata pelajaran" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-white/20">
+                <SelectContent className="bg-white border-gray-200 z-50">
                   {subjects.map((subject) => (
-                    <SelectItem key={subject.id} value={subject.id}>{subject.name}</SelectItem>
+                    <SelectItem key={subject.id} value={subject.id} className="text-gray-900 hover:bg-gray-50">{subject.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <label className="text-gray-300 text-sm mb-2 block">Pilih Kategori</label>
+              <label className="text-gray-700 text-sm mb-2 block font-medium">Pilih Kategori</label>
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                <SelectTrigger className="bg-white border-gray-300 text-gray-900">
                   <SelectValue placeholder="Pilih kategori" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-white/20">
+                <SelectContent className="bg-white border-gray-200 z-50">
                   {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>
+                    <SelectItem key={category.id} value={category.id} className="text-gray-900 hover:bg-gray-50">{category.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="text-gray-300 text-sm">Pilih Penilaian</label>
+                <label className="text-gray-700 text-sm font-medium">Pilih Penilaian</label>
                 {selectedCategory && selectedSubject && (
                   <Dialog open={showAssessmentDialog} onOpenChange={setShowAssessmentDialog}>
                     <DialogTrigger asChild>
-                      <Button size="sm" variant="outline" className="border-white/20 text-gray-300 hover:bg-white/10">
+                      <Button size="sm" variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50">
                         <Plus size={14} />
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="bg-slate-800 border-white/20">
+                    <DialogContent className="bg-white border-gray-200">
                       <DialogHeader>
-                        <DialogTitle className="text-white">Tambah Penilaian Baru</DialogTitle>
+                        <DialogTitle className="text-gray-900">Tambah Penilaian Baru</DialogTitle>
                       </DialogHeader>
                       <div className="space-y-4">
                         <div>
-                          <Label className="text-gray-300">Nama Penilaian</Label>
+                          <Label className="text-gray-700">Nama Penilaian</Label>
                           <Input
                             value={newAssessmentName}
                             onChange={(e) => setNewAssessmentName(e.target.value)}
                             placeholder="Contoh: UH 1, Tugas 1, Kuis 1"
-                            className="bg-white/10 border-white/20 text-white"
+                            className="bg-white border-gray-300 text-gray-900"
                           />
                         </div>
-                        <Button onClick={addAssessment} className="bg-gradient-to-r from-green-500 to-emerald-500">
+                        <Button onClick={addAssessment} className="bg-blue-500 hover:bg-blue-600 text-white">
                           Tambah Penilaian
                         </Button>
                       </div>
@@ -300,12 +300,12 @@ export const ScoreInput = () => {
                 )}
               </div>
               <Select value={selectedAssessment} onValueChange={setSelectedAssessment}>
-                <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                <SelectTrigger className="bg-white border-gray-300 text-gray-900">
                   <SelectValue placeholder="Pilih penilaian" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-white/20">
+                <SelectContent className="bg-white border-gray-200 z-50">
                   {categorySubjectAssessments.map((assessment) => (
-                    <SelectItem key={assessment} value={assessment}>
+                    <SelectItem key={assessment} value={assessment} className="text-gray-900 hover:bg-gray-50">
                       <div className="flex items-center justify-between w-full">
                         <span>{assessment}</span>
                         <Button
@@ -315,7 +315,7 @@ export const ScoreInput = () => {
                             e.stopPropagation();
                             deleteAssessment(assessment);
                           }}
-                          className="ml-2 p-1 h-auto text-red-400 hover:text-red-300"
+                          className="ml-2 p-1 h-auto text-red-500 hover:text-red-600"
                         >
                           <Trash2 size={12} />
                         </Button>
@@ -330,16 +330,16 @@ export const ScoreInput = () => {
       </Card>
 
       {selectedClass && selectedSubject && selectedCategory && selectedAssessment && (
-        <Card className="bg-black/20 backdrop-blur-lg border-white/10">
+        <Card className="bg-white border border-gray-200 shadow-sm">
           <CardHeader>
             <div className="flex justify-between items-center">
-              <CardTitle className="text-white">
+              <CardTitle className="text-gray-900">
                 Input Nilai - {classes.find(c => c.id === selectedClass)?.name} - {subjects.find(s => s.id === selectedSubject)?.name} - {categories.find(c => c.id === selectedCategory)?.name} - {selectedAssessment}
               </CardTitle>
               {hasUnsavedChanges && (
                 <Button
                   onClick={handleSaveAll}
-                  className="bg-gradient-to-r from-blue-500 to-purple-500"
+                  className="bg-green-500 hover:bg-green-600 text-white"
                 >
                   <CheckCircle size={16} className="mr-2" />
                   Simpan Semua
@@ -355,10 +355,10 @@ export const ScoreInput = () => {
                 const hasUnsavedChanges = scoreInputs[key] !== undefined;
                 
                 return (
-                  <div key={student.id} className="flex items-center justify-between p-4 rounded-lg bg-white/5">
+                  <div key={student.id} className="flex items-center justify-between p-4 rounded-lg bg-gray-50 border border-gray-200">
                     <div>
-                      <h3 className="text-white font-medium">{student.name}</h3>
-                      <p className="text-gray-400 text-sm">NIS: {student.nis}</p>
+                      <h3 className="text-gray-900 font-medium">{student.name}</h3>
+                      <p className="text-gray-600 text-sm">NIS: {student.nis}</p>
                     </div>
                     <div className="flex items-center space-x-3">
                       <Input
@@ -368,19 +368,19 @@ export const ScoreInput = () => {
                         value={currentValue}
                         onChange={(e) => handleScoreChange(student.id, e.target.value)}
                         placeholder="0-100"
-                        className="w-24 bg-white/10 border-white/20 text-white text-center"
+                        className="w-24 bg-white border-gray-300 text-gray-900 text-center"
                       />
                       {hasUnsavedChanges && (
                         <Button
                           onClick={() => handleSave(student.id)}
                           size="sm"
-                          className="bg-gradient-to-r from-green-500 to-emerald-500"
+                          className="bg-green-500 hover:bg-green-600 text-white"
                         >
                           <Save size={16} />
                         </Button>
                       )}
                       {!hasUnsavedChanges && getExistingScore(student.id, selectedCategory, selectedSubject, selectedAssessment) && (
-                        <Edit size={16} className="text-blue-400" />
+                        <Edit size={16} className="text-blue-500" />
                       )}
                     </div>
                   </div>
@@ -390,7 +390,7 @@ export const ScoreInput = () => {
             
             {filteredStudents.length === 0 && (
               <div className="text-center py-8">
-                <p className="text-gray-400">Tidak ada siswa di kelas ini</p>
+                <p className="text-gray-500">Tidak ada siswa di kelas ini</p>
               </div>
             )}
           </CardContent>
@@ -399,8 +399,8 @@ export const ScoreInput = () => {
 
       {(!selectedClass || !selectedSubject || !selectedCategory || !selectedAssessment) && (
         <div className="text-center py-12">
-          <Edit size={48} className="mx-auto text-gray-500 mb-4" />
-          <p className="text-gray-400">Pilih kelas, mata pelajaran, kategori, dan penilaian untuk mulai input nilai</p>
+          <Edit size={48} className="mx-auto text-gray-400 mb-4" />
+          <p className="text-gray-500">Pilih kelas, mata pelajaran, kategori, dan penilaian untuk mulai input nilai</p>
         </div>
       )}
     </div>
