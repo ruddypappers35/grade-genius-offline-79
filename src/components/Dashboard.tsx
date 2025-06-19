@@ -92,45 +92,6 @@ export const Dashboard = () => {
           </Card>
         ))}
       </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-black/20 backdrop-blur-lg border-white/10">
-          <CardHeader>
-            <CardTitle className="text-white">Aktivitas Terbaru</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center space-x-3 p-3 rounded-lg bg-white/5">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <span className="text-gray-300 text-sm">Kelas XII IPA 1 ditambahkan</span>
-            </div>
-            <div className="flex items-center space-x-3 p-3 rounded-lg bg-white/5">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-gray-300 text-sm">25 siswa baru diimport</span>
-            </div>
-            <div className="flex items-center space-x-3 p-3 rounded-lg bg-white/5">
-              <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-              <span className="text-gray-300 text-sm">Nilai UTS diupdate</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-black/20 backdrop-blur-lg border-white/10">
-          <CardHeader>
-            <CardTitle className="text-white">Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <button className="w-full p-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg text-white font-medium hover:shadow-lg transform hover:scale-105 transition-all">
-              Tambah Siswa Baru
-            </button>
-            <button className="w-full p-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg text-white font-medium hover:shadow-lg transform hover:scale-105 transition-all">
-              Input Nilai
-            </button>
-            <button className="w-full p-3 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg text-white font-medium hover:shadow-lg transform hover:scale-105 transition-all">
-              Export Data
-            </button>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 };

@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { Save, Edit, Plus, Trash2 } from "lucide-react";
+import { Save, Edit, Plus, Trash2, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -95,10 +94,8 @@ export const ScoreInput = () => {
     let updatedScores = [...scores];
 
     if (existingScoreIndex >= 0) {
-      // Update existing score
       updatedScores[existingScoreIndex].value = value;
     } else {
-      // Add new score
       const newScore: Score = {
         id: Date.now().toString(),
         studentId,
@@ -119,6 +116,57 @@ export const ScoreInput = () => {
       delete newInputs[key];
       return newInputs;
     });
+  };
+
+  const handleSaveAll = () => {
+    if (!selectedCategory || !selectedSubject || !selectedAssessment || Object.keys(scoreInputs).length === 0) return;
+    
+    let updatedScores = [...scores];
+    let savedCount = 0;
+    
+    Object.entries(scoreInputs).forEach(([key, value]) => {
+      if (key.includes(`${selectedCategory}-${selectedSubject}-${selectedAssessment}`)) {
+        const studentId = key.split('-')[0];
+        
+        const existingScoreIndex = updatedScores.findIndex(score => 
+          score.studentId === studentId && 
+          score.categoryId === selectedCategory &&
+          score.subjectId === selectedSubject &&
+          score.assessmentName === selectedAssessment
+        );
+
+        if (existingScoreIndex >= 0) {
+          updatedScores[existingScoreIndex].value = value;
+        } else {
+          const newScore: Score = {
+            id: Date.now().toString() + Math.random().toString(),
+            studentId,
+            categoryId: selectedCategory,
+            subjectId: selectedSubject,
+            assessmentName: selectedAssessment,
+            value
+          };
+          updatedScores.push(newScore);
+        }
+        savedCount++;
+      }
+    });
+
+    setScores(updatedScores);
+    localStorage.setItem('scores', JSON.stringify(updatedScores));
+    
+    // Clear all temporary inputs for current selection
+    setScoreInputs(prev => {
+      const newInputs = { ...prev };
+      Object.keys(newInputs).forEach(key => {
+        if (key.includes(`${selectedCategory}-${selectedSubject}-${selectedAssessment}`)) {
+          delete newInputs[key];
+        }
+      });
+      return newInputs;
+    });
+    
+    alert(`${savedCount} nilai berhasil disimpan!`);
   };
 
   const addAssessment = () => {
@@ -152,7 +200,6 @@ export const ScoreInput = () => {
     setAssessments(updatedAssessments);
     localStorage.setItem('assessments', JSON.stringify(updatedAssessments));
     
-    // Reset selected assessment if it was deleted
     if (selectedAssessment === assessmentName) {
       setSelectedAssessment("");
     }
@@ -161,6 +208,10 @@ export const ScoreInput = () => {
   const filteredStudents = getFilteredStudents();
   const categorySubjectAssessments = selectedCategory && selectedSubject ? 
     (assessments[selectedCategory]?.[selectedSubject] || []) : [];
+
+  const hasUnsavedChanges = Object.keys(scoreInputs).some(key => 
+    key.includes(`${selectedCategory}-${selectedSubject}-${selectedAssessment}`)
+  );
 
   return (
     <div className="space-y-6">
@@ -281,9 +332,20 @@ export const ScoreInput = () => {
       {selectedClass && selectedSubject && selectedCategory && selectedAssessment && (
         <Card className="bg-black/20 backdrop-blur-lg border-white/10">
           <CardHeader>
-            <CardTitle className="text-white">
-              Input Nilai - {classes.find(c => c.id === selectedClass)?.name} - {subjects.find(s => s.id === selectedSubject)?.name} - {categories.find(c => c.id === selectedCategory)?.name} - {selectedAssessment}
-            </CardTitle>
+            <div className="flex justify-between items-center">
+              <CardTitle className="text-white">
+                Input Nilai - {classes.find(c => c.id === selectedClass)?.name} - {subjects.find(s => s.id === selectedSubject)?.name} - {categories.find(c => c.id === selectedCategory)?.name} - {selectedAssessment}
+              </CardTitle>
+              {hasUnsavedChanges && (
+                <Button
+                  onClick={handleSaveAll}
+                  className="bg-gradient-to-r from-blue-500 to-purple-500"
+                >
+                  <CheckCircle size={16} className="mr-2" />
+                  Simpan Semua
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">

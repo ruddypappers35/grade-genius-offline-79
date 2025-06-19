@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { Plus, Upload, Download, Trash2, Filter } from "lucide-react";
+import { Plus, Upload, Download, Trash2, Filter, Edit, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +22,7 @@ export const StudentManagement = () => {
   const [showForm, setShowForm] = useState(false);
   const [selectedClass, setSelectedClass] = useState<string>("all");
   const [formData, setFormData] = useState({ name: "", nis: "", classId: "" });
+  const [editingId, setEditingId] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -50,28 +50,60 @@ export const StudentManagement = () => {
     if (!formData.name || !formData.nis || !formData.classId) return;
 
     const selectedClassData = classes.find(cls => cls.id === formData.classId);
-    const newStudent: Student = {
-      id: Date.now().toString(),
-      name: formData.name,
-      nis: formData.nis,
-      classId: formData.classId,
-      className: selectedClassData?.name || ''
-    };
-
-    const updatedStudents = [...students, newStudent];
-    setStudents(updatedStudents);
     
-    // Save without className to localStorage
-    const studentsToSave = updatedStudents.map(({ className, ...student }) => student);
-    localStorage.setItem('students', JSON.stringify(studentsToSave));
+    if (editingId) {
+      // Update existing student
+      const updatedStudents = students.map(student => 
+        student.id === editingId 
+          ? { ...student, name: formData.name, nis: formData.nis, classId: formData.classId, className: selectedClassData?.name || '' }
+          : student
+      );
+      setStudents(updatedStudents);
+      
+      const studentsToSave = updatedStudents.map(({ className, ...student }) => student);
+      localStorage.setItem('students', JSON.stringify(studentsToSave));
+      
+      toast({
+        title: "Siswa Berhasil Diupdate",
+        description: `${formData.name} berhasil diupdate`,
+      });
+      setEditingId(null);
+    } else {
+      // Add new student
+      const newStudent: Student = {
+        id: Date.now().toString(),
+        name: formData.name,
+        nis: formData.nis,
+        classId: formData.classId,
+        className: selectedClassData?.name || ''
+      };
+
+      const updatedStudents = [...students, newStudent];
+      setStudents(updatedStudents);
+      
+      const studentsToSave = updatedStudents.map(({ className, ...student }) => student);
+      localStorage.setItem('students', JSON.stringify(studentsToSave));
+      
+      toast({
+        title: "Siswa Berhasil Ditambahkan",
+        description: `${formData.name} berhasil ditambahkan`,
+      });
+    }
     
     setFormData({ name: "", nis: "", classId: "" });
     setShowForm(false);
-    
-    toast({
-      title: "Siswa Berhasil Ditambahkan",
-      description: `${formData.name} berhasil ditambahkan`,
-    });
+  };
+
+  const handleEdit = (student: Student) => {
+    setFormData({ name: student.name, nis: student.nis, classId: student.classId });
+    setEditingId(student.id);
+    setShowForm(true);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setFormData({ name: "", nis: "", classId: "" });
+    setShowForm(false);
   };
 
   const handleDelete = (id: string) => {
@@ -288,7 +320,19 @@ export const StudentManagement = () => {
       {showForm && (
         <Card className="bg-black/20 backdrop-blur-lg border-white/10">
           <CardHeader>
-            <CardTitle className="text-white">Tambah Siswa Baru</CardTitle>
+            <CardTitle className="text-white flex items-center justify-between">
+              {editingId ? 'Edit Siswa' : 'Tambah Siswa Baru'}
+              {editingId && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleCancelEdit}
+                  className="text-gray-400 hover:text-white"
+                >
+                  <X size={16} />
+                </Button>
+              )}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -331,12 +375,12 @@ export const StudentManagement = () => {
               </div>
               <div className="flex space-x-2">
                 <Button type="submit" className="bg-gradient-to-r from-green-500 to-emerald-500">
-                  Simpan
+                  {editingId ? 'Update' : 'Simpan'}
                 </Button>
                 <Button 
                   type="button" 
                   variant="outline" 
-                  onClick={() => setShowForm(false)}
+                  onClick={editingId ? handleCancelEdit : () => setShowForm(false)}
                   className="border-white/20 text-gray-300 hover:bg-white/10"
                 >
                   Batal
@@ -374,14 +418,24 @@ export const StudentManagement = () => {
                     <td className="py-3 px-4 text-gray-300">{student.nis}</td>
                     <td className="py-3 px-4 text-blue-400">{student.className}</td>
                     <td className="py-3 px-4 text-center">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(student.id)}
-                        className="text-red-400 hover:text-red-300 hover:bg-red-500/20"
-                      >
-                        <Trash2 size={16} />
-                      </Button>
+                      <div className="flex justify-center space-x-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(student)}
+                          className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/20"
+                        >
+                          <Edit size={16} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(student.id)}
+                          className="text-red-400 hover:text-red-300 hover:bg-red-500/20"
+                        >
+                          <Trash2 size={16} />
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}
