@@ -1,10 +1,11 @@
 
 import { useState, useEffect } from "react";
-import { Plus, Trash2, Users, User } from "lucide-react";
+import { Plus, Edit, Trash2, User } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 interface Student {
   id: string;
@@ -23,6 +24,7 @@ export const StudentManagement = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [classes, setClasses] = useState<Class[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({ name: "", nis: "", classId: "" });
 
   useEffect(() => {
@@ -46,21 +48,41 @@ export const StudentManagement = () => {
     e.preventDefault();
     if (!formData.name || !formData.nis || !formData.classId) return;
 
-    const newStudent: Student = {
-      id: Date.now().toString(),
-      name: formData.name,
-      nis: formData.nis,
-      classId: formData.classId
-    };
+    if (editingId) {
+      // Update existing student
+      const updatedStudents = students.map(student => 
+        student.id === editingId 
+          ? { ...student, name: formData.name, nis: formData.nis, classId: formData.classId }
+          : student
+      );
+      const savedStudents = updatedStudents.map(({ className, ...student }) => student);
+      localStorage.setItem('students', JSON.stringify(savedStudents));
+      loadData();
+      setEditingId(null);
+    } else {
+      // Add new student
+      const newStudent: Student = {
+        id: Date.now().toString(),
+        name: formData.name,
+        nis: formData.nis,
+        classId: formData.classId
+      };
 
-    const updatedStudents = [...students, newStudent];
-    const savedStudents = updatedStudents.map(({ className, ...student }) => student);
-    
-    localStorage.setItem('students', JSON.stringify(savedStudents));
-    loadData();
+      const updatedStudents = [...students, newStudent];
+      const savedStudents = updatedStudents.map(({ className, ...student }) => student);
+      
+      localStorage.setItem('students', JSON.stringify(savedStudents));
+      loadData();
+    }
     
     setFormData({ name: "", nis: "", classId: "" });
     setShowForm(false);
+  };
+
+  const handleEdit = (student: Student) => {
+    setFormData({ name: student.name, nis: student.nis, classId: student.classId });
+    setEditingId(student.id);
+    setShowForm(true);
   };
 
   const handleDelete = (id: string) => {
@@ -93,7 +115,9 @@ export const StudentManagement = () => {
       {showForm && (
         <Card className="bg-white border border-gray-200 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-gray-900">Tambah Siswa Baru</CardTitle>
+            <CardTitle className="text-gray-900">
+              {editingId ? 'Edit Siswa' : 'Tambah Siswa Baru'}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -135,12 +159,16 @@ export const StudentManagement = () => {
               </div>
               <div className="flex space-x-2">
                 <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white">
-                  Simpan
+                  {editingId ? 'Update' : 'Simpan'}
                 </Button>
                 <Button 
                   type="button" 
                   variant="outline" 
-                  onClick={() => setShowForm(false)}
+                  onClick={() => {
+                    setShowForm(false);
+                    setEditingId(null);
+                    setFormData({ name: "", nis: "", classId: "" });
+                  }}
                   className="border-gray-300 text-gray-700 hover:bg-gray-50"
                 >
                   Batal
@@ -151,36 +179,59 @@ export const StudentManagement = () => {
         </Card>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {students.map((student) => (
-          <Card key={student.id} className="bg-white border border-gray-200 shadow-sm hover:border-gray-300 transition-all duration-300">
-            <CardHeader className="pb-3">
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="text-gray-900 text-lg">{student.name}</CardTitle>
-                  <p className="text-gray-600 text-sm mt-1">NIS: {student.nis}</p>
-                  <p className="text-gray-600 text-sm">Kelas: {student.className}</p>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDelete(student.id)}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                  <Trash2 size={16} />
-                </Button>
-              </div>
-            </CardHeader>
-          </Card>
-        ))}
-      </div>
-
-      {students.length === 0 && (
-        <div className="text-center py-12">
-          <User size={48} className="mx-auto text-gray-400 mb-4" />
-          <p className="text-gray-600">Belum ada siswa. Tambah siswa pertama Anda!</p>
-        </div>
-      )}
+      <Card className="bg-white border border-gray-200 shadow-sm">
+        <CardHeader>
+          <CardTitle className="text-gray-900">Daftar Siswa</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {students.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-gray-900">Nama</TableHead>
+                  <TableHead className="text-gray-900">NIS</TableHead>
+                  <TableHead className="text-gray-900">Kelas</TableHead>
+                  <TableHead className="text-gray-900 w-32">Aksi</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {students.map((student) => (
+                  <TableRow key={student.id}>
+                    <TableCell className="text-gray-900 font-medium">{student.name}</TableCell>
+                    <TableCell className="text-gray-600">{student.nis}</TableCell>
+                    <TableCell className="text-gray-600">{student.className}</TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(student)}
+                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        >
+                          <Edit size={16} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(student.id)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 size={16} />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <div className="text-center py-12">
+              <User size={48} className="mx-auto text-gray-400 mb-4" />
+              <p className="text-gray-600">Belum ada siswa. Tambah siswa pertama Anda!</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };

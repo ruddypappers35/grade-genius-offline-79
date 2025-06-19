@@ -106,33 +106,33 @@ export const WeightManagement = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold mb-2 text-gray-900">
             Bobot Nilai
           </h1>
-          <p className="text-gray-400">Set weights for each assessment category</p>
+          <p className="text-gray-600">Set weights for each assessment category</p>
         </div>
         <Button
           onClick={() => setShowForm(!showForm)}
-          className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+          className="bg-blue-600 hover:bg-blue-700 text-white"
         >
           <Plus size={16} className="mr-2" />
           Tambah Bobot
         </Button>
       </div>
 
-      <Card className="bg-black/20 backdrop-blur-lg border-white/10">
+      <Card className="bg-white border border-gray-200 shadow-sm">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Scale size={20} className="text-blue-400" />
-              <span className="text-white font-medium">Total Bobot:</span>
+              <Scale size={20} className="text-gray-700" />
+              <span className="text-gray-900 font-medium">Total Bobot:</span>
             </div>
-            <div className={`text-2xl font-bold ${totalWeight === 100 ? 'text-green-400' : 'text-orange-400'}`}>
+            <div className={`text-2xl font-bold ${totalWeight === 100 ? 'text-green-600' : 'text-orange-600'}`}>
               {totalWeight}%
             </div>
           </div>
           {totalWeight !== 100 && (
-            <p className="text-orange-400 text-sm mt-2">
+            <p className="text-orange-600 text-sm mt-2">
               ⚠️ Total bobot harus 100% untuk perhitungan yang akurat
             </p>
           )}
@@ -140,29 +140,29 @@ export const WeightManagement = () => {
       </Card>
 
       {showForm && (
-        <Card className="bg-black/20 backdrop-blur-lg border-white/10">
+        <Card className="bg-white border border-gray-200 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-white">
+            <CardTitle className="text-gray-900">
               {editingId ? 'Edit Bobot' : 'Tambah Bobot Baru'}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="category" className="text-gray-300">Kategori</Label>
+                <Label htmlFor="category" className="text-gray-700">Kategori</Label>
                 <Select value={formData.categoryId} onValueChange={(value) => setFormData({ ...formData, categoryId: value })}>
-                  <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                  <SelectTrigger className="bg-white border-gray-300 text-gray-900">
                     <SelectValue placeholder="Pilih kategori" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-white/20">
+                  <SelectContent className="bg-white border-gray-300">
                     {categories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>
+                      <SelectItem key={category.id} value={category.id} className="text-gray-900">{category.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label htmlFor="weight" className="text-gray-300">Bobot (%)</Label>
+                <Label htmlFor="weight" className="text-gray-700">Bobot (%)</Label>
                 <Input
                   id="weight"
                   type="number"
@@ -171,11 +171,11 @@ export const WeightManagement = () => {
                   value={formData.weight || ''}
                   onChange={(e) => setFormData({ ...formData, weight: Number(e.target.value) })}
                   placeholder="contoh: 30"
-                  className="bg-white/10 border-white/20 text-white placeholder-gray-400"
+                  className="bg-white border-gray-300 text-gray-900 placeholder-gray-500"
                 />
               </div>
               <div className="flex space-x-2">
-                <Button type="submit" className="bg-gradient-to-r from-green-500 to-emerald-500">
+                <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white">
                   {editingId ? 'Update' : 'Simpan'}
                 </Button>
                 <Button 
@@ -186,7 +186,7 @@ export const WeightManagement = () => {
                     setEditingId(null);
                     setFormData({ categoryId: "", weight: 0 });
                   }}
-                  className="border-white/20 text-gray-300 hover:bg-white/10"
+                  className="border-gray-300 text-gray-700 hover:bg-gray-50"
                 >
                   Batal
                 </Button>
@@ -196,24 +196,24 @@ export const WeightManagement = () => {
         </Card>
       )}
 
-      <Card className="bg-black/20 backdrop-blur-lg border-white/10">
+      <Card className="bg-white border border-gray-200 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-white">Daftar Bobot</CardTitle>
+          <CardTitle className="text-gray-900">Daftar Bobot</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             {weights.map((weight) => (
-              <div key={weight.id} className="flex items-center justify-between p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+              <div key={weight.id} className="flex items-center justify-between p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors border border-gray-200">
                 <div>
-                  <h3 className="text-white font-medium">{weight.categoryName}</h3>
-                  <p className="text-gray-400 text-sm">Bobot: {weight.weight}%</p>
+                  <h3 className="text-gray-900 font-medium">{weight.categoryName}</h3>
+                  <p className="text-gray-600 text-sm">Bobot: {weight.weight}%</p>
                 </div>
                 <div className="flex space-x-2">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => handleEdit(weight)}
-                    className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/20"
+                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                   >
                     <Edit size={16} />
                   </Button>
@@ -221,7 +221,7 @@ export const WeightManagement = () => {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleDelete(weight.id)}
-                    className="text-red-400 hover:text-red-300 hover:bg-red-500/20"
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
                   >
                     <Trash2 size={16} />
                   </Button>
@@ -232,8 +232,8 @@ export const WeightManagement = () => {
           
           {weights.length === 0 && (
             <div className="text-center py-8">
-              <Scale size={48} className="mx-auto text-gray-500 mb-4" />
-              <p className="text-gray-400">Belum ada bobot nilai. Tambah bobot pertama Anda!</p>
+              <Scale size={48} className="mx-auto text-gray-400 mb-4" />
+              <p className="text-gray-600">Belum ada bobot nilai. Tambah bobot pertama Anda!</p>
             </div>
           )}
         </CardContent>

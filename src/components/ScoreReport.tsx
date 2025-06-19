@@ -158,15 +158,15 @@ export const ScoreReport = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold mb-2 text-gray-900">
             Rekap Nilai
           </h1>
-          <p className="text-gray-400">View and export detailed score reports by class</p>
+          <p className="text-gray-600">View and export detailed score reports by class</p>
         </div>
         {reports.length > 0 && (
           <Button
             onClick={exportToExcel}
-            className="bg-gradient-to-r from-green-500 to-emerald-500"
+            className="bg-green-600 hover:bg-green-700 text-white"
           >
             <Download size={16} className="mr-2" />
             Export Excel
@@ -174,18 +174,18 @@ export const ScoreReport = () => {
         )}
       </div>
 
-      <Card className="bg-black/20 backdrop-blur-lg border-white/10">
+      <Card className="bg-white border border-gray-200 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-white">Filter Kelas</CardTitle>
+          <CardTitle className="text-gray-900">Filter Kelas</CardTitle>
         </CardHeader>
         <CardContent>
           <Select value={selectedClass} onValueChange={setSelectedClass}>
-            <SelectTrigger className="bg-white/10 border-white/20 text-white">
+            <SelectTrigger className="bg-white border-gray-300 text-gray-900">
               <SelectValue placeholder="Pilih kelas untuk melihat laporan" />
             </SelectTrigger>
-            <SelectContent className="bg-slate-800 border-white/20">
+            <SelectContent className="bg-white border-gray-300">
               {classes.map((cls) => (
-                <SelectItem key={cls.id} value={cls.id}>{cls.name}</SelectItem>
+                <SelectItem key={cls.id} value={cls.id} className="text-gray-900">{cls.name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -193,9 +193,9 @@ export const ScoreReport = () => {
       </Card>
 
       {selectedClass && reports.length > 0 && (
-        <Card className="bg-black/20 backdrop-blur-lg border-white/10">
+        <Card className="bg-white border border-gray-200 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-white">
+            <CardTitle className="text-gray-900">
               Laporan Nilai - {classes.find(c => c.id === selectedClass)?.name}
             </CardTitle>
           </CardHeader>
@@ -203,14 +203,14 @@ export const ScoreReport = () => {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-white/20">
-                    <th className="text-left py-3 px-4 text-gray-300">Nama</th>
-                    <th className="text-left py-3 px-4 text-gray-300">NIS</th>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-3 px-4 text-gray-900 font-semibold">Nama</th>
+                    <th className="text-left py-3 px-4 text-gray-900 font-semibold">NIS</th>
                     {categories.map(category => 
                       subjects.map(subject => {
                         const categorySubjectAssessments = assessments[category.id]?.[subject.id] || [];
                         return categorySubjectAssessments.map(assessment => (
-                          <th key={`${category.id}-${subject.id}-${assessment}`} className="text-center py-3 px-4 text-gray-300 text-xs">
+                          <th key={`${category.id}-${subject.id}-${assessment}`} className="text-center py-3 px-4 text-gray-900 font-semibold text-xs">
                             {category.name} - {subject.name}<br/>{assessment}
                           </th>
                         ));
@@ -218,24 +218,24 @@ export const ScoreReport = () => {
                     )}
                     {categories.map(category => 
                       subjects.map(subject => (
-                        <th key={`avg-${category.id}-${subject.id}`} className="text-center py-3 px-4 text-gray-300 text-xs">
+                        <th key={`avg-${category.id}-${subject.id}`} className="text-center py-3 px-4 text-gray-900 font-semibold text-xs">
                           Rata-rata<br/>{category.name} - {subject.name}
                         </th>
                       ))
                     )}
-                    <th className="text-center py-3 px-4 text-gray-300 font-bold">Rata-rata</th>
+                    <th className="text-center py-3 px-4 text-gray-900 font-bold">Rata-rata</th>
                   </tr>
                 </thead>
                 <tbody>
                   {reports.map((report) => (
-                    <tr key={report.id} className="border-b border-white/10 hover:bg-white/5">
-                      <td className="py-3 px-4 text-white">{report.name}</td>
-                      <td className="py-3 px-4 text-gray-300">{report.nis}</td>
+                    <tr key={report.id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="py-3 px-4 text-gray-900 font-medium">{report.name}</td>
+                      <td className="py-3 px-4 text-gray-600">{report.nis}</td>
                       {categories.map(category => 
                         subjects.map(subject => {
                           const categorySubjectAssessments = assessments[category.id]?.[subject.id] || [];
                           return categorySubjectAssessments.map(assessment => (
-                            <td key={`${category.id}-${subject.id}-${assessment}`} className="py-3 px-4 text-center text-gray-300">
+                            <td key={`${category.id}-${subject.id}-${assessment}`} className="py-3 px-4 text-center text-gray-600">
                               {report.scores[category.id]?.[subject.id]?.[assessment] || '-'}
                             </td>
                           ));
@@ -243,16 +243,16 @@ export const ScoreReport = () => {
                       )}
                       {categories.map(category => 
                         subjects.map(subject => (
-                          <td key={`avg-${category.id}-${subject.id}`} className="py-3 px-4 text-center text-gray-300">
+                          <td key={`avg-${category.id}-${subject.id}`} className="py-3 px-4 text-center text-gray-600">
                             {report.categoryAverages[category.id]?.[subject.id] || '-'}
                           </td>
                         ))
                       )}
                       <td className="py-3 px-4 text-center font-bold">
                         <span className={`px-2 py-1 rounded ${
-                          report.weightedAverage >= 80 ? 'bg-green-500/20 text-green-400' :
-                          report.weightedAverage >= 70 ? 'bg-yellow-500/20 text-yellow-400' :
-                          'bg-red-500/20 text-red-400'
+                          report.weightedAverage >= 80 ? 'bg-green-100 text-green-800' :
+                          report.weightedAverage >= 70 ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-red-100 text-red-800'
                         }`}>
                           {report.weightedAverage}
                         </span>
@@ -268,15 +268,15 @@ export const ScoreReport = () => {
 
       {selectedClass && reports.length === 0 && (
         <div className="text-center py-12">
-          <BarChart size={48} className="mx-auto text-gray-500 mb-4" />
-          <p className="text-gray-400">Tidak ada data nilai untuk kelas ini</p>
+          <BarChart size={48} className="mx-auto text-gray-400 mb-4" />
+          <p className="text-gray-600">Tidak ada data nilai untuk kelas ini</p>
         </div>
       )}
 
       {!selectedClass && (
         <div className="text-center py-12">
-          <BarChart size={48} className="mx-auto text-gray-500 mb-4" />
-          <p className="text-gray-400">Pilih kelas untuk melihat laporan nilai</p>
+          <BarChart size={48} className="mx-auto text-gray-400 mb-4" />
+          <p className="text-gray-600">Pilih kelas untuk melihat laporan nilai</p>
         </div>
       )}
     </div>
