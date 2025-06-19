@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, User, Download, Upload, Search } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,7 +29,7 @@ export const StudentManagement = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({ name: "", nis: "", classId: "" });
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterClass, setFilterClass] = useState<string>("");
+  const [filterClass, setFilterClass] = useState<string>("all");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -54,7 +53,7 @@ export const StudentManagement = () => {
     return students.filter(student => {
       const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            student.nis.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesClass = !filterClass || student.classId === filterClass;
+      const matchesClass = filterClass === "all" || student.classId === filterClass;
       return matchesSearch && matchesClass;
     });
   };
@@ -371,7 +370,7 @@ export const StudentManagement = () => {
                   <SelectValue placeholder="Semua kelas" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-gray-300">
-                  <SelectItem value="" className="text-gray-900">Semua kelas</SelectItem>
+                  <SelectItem value="all" className="text-gray-900">Semua kelas</SelectItem>
                   {classes.map((cls) => (
                     <SelectItem key={cls.id} value={cls.id} className="text-gray-900">{cls.name}</SelectItem>
                   ))}
@@ -426,7 +425,7 @@ export const StudentManagement = () => {
             <div className="text-center py-12">
               <User size={48} className="mx-auto text-gray-400 mb-4" />
               <p className="text-gray-600">
-                {searchTerm || filterClass ? 'Tidak ada siswa yang sesuai dengan filter' : 'Belum ada siswa. Tambah siswa pertama Anda!'}
+                {searchTerm || filterClass !== "all" ? 'Tidak ada siswa yang sesuai dengan filter' : 'Belum ada siswa. Tambah siswa pertama Anda!'}
               </p>
             </div>
           )}
