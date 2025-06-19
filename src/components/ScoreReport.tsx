@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from "react";
-import { Download, BarChart } from "lucide-react";
+import { Download, BarChart, Filter } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -22,6 +23,7 @@ export const ScoreReport = () => {
   const [weights, setWeights] = useState<any[]>([]);
   const [assessments, setAssessments] = useState<{ [categoryId: string]: { [subjectId: string]: string[] } }>({});
   const [selectedClass, setSelectedClass] = useState<string>("");
+  const [selectedSubject, setSelectedSubject] = useState<string>("all");
 
   useEffect(() => {
     loadData();
@@ -31,7 +33,7 @@ export const ScoreReport = () => {
     if (selectedClass) {
       generateReport();
     }
-  }, [selectedClass]);
+  }, [selectedClass, selectedSubject]);
 
   const loadData = () => {
     const savedClasses = JSON.parse(localStorage.getItem('classes') || '[]');
@@ -63,7 +65,9 @@ export const ScoreReport = () => {
         studentScores[category.id] = {};
         categoryAverages[category.id] = {};
         
-        subjects.forEach(subject => {
+        const filteredSubjects = selectedSubject === "all" ? subjects : subjects.filter(s => s.id === selectedSubject);
+        
+        filteredSubjects.forEach(subject => {
           const categorySubjectScores = scores.filter((s: any) => 
             s.studentId === student.id && s.categoryId === category.id && s.subjectId === subject.id
           );
@@ -110,15 +114,18 @@ export const ScoreReport = () => {
     if (reports.length === 0) return;
 
     const selectedClassName = classes.find(c => c.id === selectedClass)?.name || 'Unknown';
+    const selectedSubjectName = selectedSubject === "all" ? "Semua Mata Pelajaran" : subjects.find(s => s.id === selectedSubject)?.name || 'Unknown';
     
     const data: string[][] = [
-      ['Laporan Nilai Kelas ' + selectedClassName]
+      [`Laporan Nilai Kelas ${selectedClassName} - ${selectedSubjectName}`]
     ];
     
     // Header row
     const headerRow: string[] = ['No', 'Nama', 'NIS'];
+    const filteredSubjects = selectedSubject === "all" ? subjects : subjects.filter(s => s.id === selectedSubject);
+    
     categories.forEach(category => {
-      subjects.forEach(subject => {
+      filteredSubjects.forEach(subject => {
         const categorySubjectAssessments = assessments[category.id]?.[subject.id] || [];
         categorySubjectAssessments.forEach(assessment => {
           headerRow.push(`${category.name} - ${subject.name} - ${assessment}`);
@@ -126,14 +133,18 @@ export const ScoreReport = () => {
         headerRow.push(`Rata-rata ${category.name} - ${subject.name}`);
       });
     });
-    headerRow.push('Rata-rata Berbobot');
+    
+    if (selectedSubject === "all") {
+      headerRow.push('Rata-rata Berbobot');
+    }
+    
     data.push(headerRow);
 
     // Data rows
     reports.forEach((report, index) => {
       const row: string[] = [(index + 1).toString(), report.name, report.nis];
       categories.forEach(category => {
-        subjects.forEach(subject => {
+        filteredSubjects.forEach(subject => {
           const categorySubjectAssessments = assessments[category.id]?.[subject.id] || [];
           categorySubjectAssessments.forEach(assessment => {
             const scoreValue = report.scores[category.id]?.[subject.id]?.[assessment];
@@ -143,15 +154,22 @@ export const ScoreReport = () => {
           row.push(avgValue !== undefined ? avgValue.toString() : '-');
         });
       });
-      row.push(report.weightedAverage.toString());
+      
+      if (selectedSubject === "all") {
+        row.push(report.weightedAverage.toString());
+      }
+      
       data.push(row);
     });
 
     const ws = XLSX.utils.aoa_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Laporan Nilai");
-    XLSX.writeFile(wb, `laporan_nilai_${selectedClassName.replace(/\s+/g, '_')}.xlsx`);
+    const fileName = `laporan_nilai_${selectedClassName.replace(/\s+/g, '_')}_${selectedSubjectName.replace(/\s+/g, '_')}.xlsx`;
+    XLSX.writeFile(wb, fileName);
   };
+
+  const filteredSubjects = selectedSubject === "all" ? subjects : subjects.filter(s => s.id === selectedSubject);
 
   return (
     <div className="space-y-6">
@@ -160,7 +178,7 @@ export const ScoreReport = () => {
           <h1 className="text-3xl font-bold mb-2 text-gray-900">
             Rekap Nilai
           </h1>
-          <p className="text-gray-600">View and export detailed score reports by class</p>
+          <p className="text-gray-600">View and export detailed score reports by class and subject</p>
         </div>
         {reports.length > 0 && (
           <Button
@@ -175,19 +193,42 @@ export const ScoreReport = () => {
 
       <Card className="bg-white border border-gray-200 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-gray-900">Filter Kelas</CardTitle>
+          <CardTitle className="text-gray-900 flex items-center">
+            <Filter size={20} className="mr-2" />
+            Filter Laporan
+          </CardTitle>
         </CardHeader>
-        <CardContent>
-          <Select value={selectedClass} onValueChange={setSelectedClass}>
-            <SelectTrigger className="bg-white border-gray-300 text-gray-900">
-              <SelectValue placeholder="Pilih kelas untuk melihat laporan" />
-            </SelectTrigger>
-            <SelectContent className="bg-white border-gray-300">
-              {classes.map((cls) => (
-                <SelectItem key={cls.id} value={cls.id} className="text-gray-900">{cls.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Pilih Kelas</label>
+              <Select value={selectedClass} onValueChange={setSelectedClass}>
+                <SelectTrigger className="bg-white border-gray-300 text-gray-900">
+                  <SelectValue placeholder="Pilih kelas untuk melihat laporan" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-gray-300">
+                  {classes.map((cls) => (
+                    <SelectItem key={cls.id} value={cls.id} className="text-gray-900">{cls.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Pilih Mata Pelajaran</label>
+              <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+                <SelectTrigger className="bg-white border-gray-300 text-gray-900">
+                  <SelectValue placeholder="Pilih mata pelajaran" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-gray-300">
+                  <SelectItem value="all" className="text-gray-900">Semua Mata Pelajaran</SelectItem>
+                  {subjects.map((subject) => (
+                    <SelectItem key={subject.id} value={subject.id} className="text-gray-900">{subject.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -195,7 +236,9 @@ export const ScoreReport = () => {
         <Card className="bg-white border border-gray-200 shadow-sm">
           <CardHeader>
             <CardTitle className="text-gray-900">
-              Laporan Nilai - {classes.find(c => c.id === selectedClass)?.name} ({reports.length} siswa)
+              Laporan Nilai - {classes.find(c => c.id === selectedClass)?.name} 
+              {selectedSubject !== "all" && ` - ${subjects.find(s => s.id === selectedSubject)?.name}`} 
+              ({reports.length} siswa)
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -207,7 +250,7 @@ export const ScoreReport = () => {
                     <th className="text-left py-3 px-4 text-gray-900 font-semibold">Nama</th>
                     <th className="text-left py-3 px-4 text-gray-900 font-semibold">NIS</th>
                     {categories.map(category => 
-                      subjects.map(subject => {
+                      filteredSubjects.map(subject => {
                         const categorySubjectAssessments = assessments[category.id]?.[subject.id] || [];
                         return categorySubjectAssessments.map(assessment => (
                           <th key={`${category.id}-${subject.id}-${assessment}`} className="text-center py-3 px-4 text-gray-900 font-semibold text-xs">
@@ -217,13 +260,15 @@ export const ScoreReport = () => {
                       })
                     )}
                     {categories.map(category => 
-                      subjects.map(subject => (
+                      filteredSubjects.map(subject => (
                         <th key={`avg-${category.id}-${subject.id}`} className="text-center py-3 px-4 text-gray-900 font-semibold text-xs">
                           Rata-rata<br/>{category.name} - {subject.name}
                         </th>
                       ))
                     )}
-                    <th className="text-center py-3 px-4 text-gray-900 font-bold">Rata-rata</th>
+                    {selectedSubject === "all" && (
+                      <th className="text-center py-3 px-4 text-gray-900 font-bold">Rata-rata</th>
+                    )}
                   </tr>
                 </thead>
                 <tbody>
@@ -233,7 +278,7 @@ export const ScoreReport = () => {
                       <td className="py-3 px-4 text-gray-900 font-medium">{report.name}</td>
                       <td className="py-3 px-4 text-gray-600">{report.nis}</td>
                       {categories.map(category => 
-                        subjects.map(subject => {
+                        filteredSubjects.map(subject => {
                           const categorySubjectAssessments = assessments[category.id]?.[subject.id] || [];
                           return categorySubjectAssessments.map(assessment => (
                             <td key={`${category.id}-${subject.id}-${assessment}`} className="py-3 px-4 text-center text-gray-600">
@@ -243,21 +288,23 @@ export const ScoreReport = () => {
                         })
                       )}
                       {categories.map(category => 
-                        subjects.map(subject => (
+                        filteredSubjects.map(subject => (
                           <td key={`avg-${category.id}-${subject.id}`} className="py-3 px-4 text-center text-gray-600">
                             {report.categoryAverages[category.id]?.[subject.id] || '-'}
                           </td>
                         ))
                       )}
-                      <td className="py-3 px-4 text-center font-bold">
-                        <span className={`px-2 py-1 rounded ${
-                          report.weightedAverage >= 80 ? 'bg-green-100 text-green-800' :
-                          report.weightedAverage >= 70 ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
-                          {report.weightedAverage}
-                        </span>
-                      </td>
+                      {selectedSubject === "all" && (
+                        <td className="py-3 px-4 text-center font-bold">
+                          <span className={`px-2 py-1 rounded ${
+                            report.weightedAverage >= 80 ? 'bg-green-100 text-green-800' :
+                            report.weightedAverage >= 70 ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-red-100 text-red-800'
+                          }`}>
+                            {report.weightedAverage}
+                          </span>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
@@ -270,14 +317,14 @@ export const ScoreReport = () => {
       {selectedClass && reports.length === 0 && (
         <div className="text-center py-12">
           <BarChart size={48} className="mx-auto text-gray-400 mb-4" />
-          <p className="text-gray-600">Tidak ada data nilai untuk kelas ini</p>
+          <p className="text-gray-600">Tidak ada data nilai untuk filter yang dipilih</p>
         </div>
       )}
 
       {!selectedClass && (
         <div className="text-center py-12">
           <BarChart size={48} className="mx-auto text-gray-400 mb-4" />
-          <p className="text-gray-600">Pilih kelas untuk melihat laporan nilai</p>
+          <p className="text-gray-600">Pilih kelas dan mata pelajaran untuk melihat laporan nilai</p>
         </div>
       )}
     </div>
