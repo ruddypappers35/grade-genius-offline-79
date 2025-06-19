@@ -41,10 +41,11 @@ const Index = () => {
           </main>
           
           <footer className="mt-auto p-4 border-t border-gray-200 text-center bg-white">
-            <p className="text-gray-600 text-sm">
-              Developed by <span className="text-gray-900 font-medium">Rudy Susanto</span>
-            </p>
-          </footer>
+  <p className="text-gray-600 text-sm">
+    Developed with <span className="text-lg">☕</span> by <span className="text-gray-900 font-medium">Rudy Susanto</span>
+  </p>
+</footer>
+
         </div>
       </div>
     </div>
