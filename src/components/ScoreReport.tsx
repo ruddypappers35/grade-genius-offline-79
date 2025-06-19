@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Download, BarChart } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -112,12 +111,12 @@ export const ScoreReport = () => {
 
     const selectedClassName = classes.find(c => c.id === selectedClass)?.name || 'Unknown';
     
-    const data = [
+    const data: string[][] = [
       ['Laporan Nilai Kelas ' + selectedClassName]
     ];
     
     // Header row
-    const headerRow = ['No', 'Nama', 'NIS'];
+    const headerRow: string[] = ['No', 'Nama', 'NIS'];
     categories.forEach(category => {
       subjects.forEach(subject => {
         const categorySubjectAssessments = assessments[category.id]?.[subject.id] || [];
@@ -132,7 +131,7 @@ export const ScoreReport = () => {
 
     // Data rows
     reports.forEach((report, index) => {
-      const row = [index + 1, report.name, report.nis];
+      const row: string[] = [(index + 1).toString(), report.name, report.nis];
       categories.forEach(category => {
         subjects.forEach(subject => {
           const categorySubjectAssessments = assessments[category.id]?.[subject.id] || [];
