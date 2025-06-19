@@ -11,6 +11,7 @@ import { WeightManagement } from "@/components/WeightManagement";
 import { ScoreInput } from "@/components/ScoreInput";
 import { ScoreReport } from "@/components/ScoreReport";
 import { DataManagement } from "@/components/DataManagement";
+import { UserGuide } from "@/components/UserGuide";
 import { useState } from "react";
 
 const Index = () => {
@@ -35,6 +36,7 @@ const Index = () => {
               <Route path="/scores" element={<ScoreInput />} />
               <Route path="/reports" element={<ScoreReport />} />
               <Route path="/data" element={<DataManagement />} />
+              <Route path="/guide" element={<UserGuide />} />
             </Routes>
           </main>
           

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Save, Edit, Plus, Trash2, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -188,20 +189,31 @@ export const ScoreInput = () => {
 
   const deleteAssessment = (assessmentName: string) => {
     if (!selectedCategory || !selectedSubject) return;
-
-    const updatedAssessments = {
-      ...assessments,
-      [selectedCategory]: {
-        ...assessments[selectedCategory],
-        [selectedSubject]: assessments[selectedCategory]?.[selectedSubject]?.filter(name => name !== assessmentName) || []
-      }
-    };
-
-    setAssessments(updatedAssessments);
-    localStorage.setItem('assessments', JSON.stringify(updatedAssessments));
     
-    if (selectedAssessment === assessmentName) {
-      setSelectedAssessment("");
+    if (confirm(`Yakin ingin menghapus penilaian "${assessmentName}"?`)) {
+      const updatedAssessments = {
+        ...assessments,
+        [selectedCategory]: {
+          ...assessments[selectedCategory],
+          [selectedSubject]: assessments[selectedCategory]?.[selectedSubject]?.filter(name => name !== assessmentName) || []
+        }
+      };
+
+      setAssessments(updatedAssessments);
+      localStorage.setItem('assessments', JSON.stringify(updatedAssessments));
+      
+      if (selectedAssessment === assessmentName) {
+        setSelectedAssessment("");
+      }
+
+      // Also remove related scores
+      const updatedScores = scores.filter(score => 
+        !(score.categoryId === selectedCategory && 
+          score.subjectId === selectedSubject && 
+          score.assessmentName === assessmentName)
+      );
+      setScores(updatedScores);
+      localStorage.setItem('scores', JSON.stringify(updatedScores));
     }
   };
 
@@ -308,22 +320,33 @@ export const ScoreInput = () => {
                     <SelectItem key={assessment} value={assessment} className="text-gray-900 hover:bg-gray-50">
                       <div className="flex items-center justify-between w-full">
                         <span>{assessment}</span>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteAssessment(assessment);
-                          }}
-                          className="ml-2 p-1 h-auto text-red-500 hover:text-red-600"
-                        >
-                          <Trash2 size={12} />
-                        </Button>
                       </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              
+              {/* Display assessments with delete buttons */}
+              {selectedCategory && selectedSubject && categorySubjectAssessments.length > 0 && (
+                <div className="mt-2 space-y-1">
+                  <label className="text-gray-700 text-xs font-medium">Penilaian yang tersedia:</label>
+                  <div className="space-y-1">
+                    {categorySubjectAssessments.map((assessment) => (
+                      <div key={assessment} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
+                        <span className="text-gray-700">{assessment}</span>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => deleteAssessment(assessment)}
+                          className="p-1 h-auto text-red-500 hover:text-red-600 hover:bg-red-50"
+                        >
+                          <Trash2 size={14} />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </CardContent>

@@ -12,7 +12,8 @@ import {
   Database,
   BookOpen,
   Menu,
-  X 
+  X,
+  HelpCircle
 } from "lucide-react";
 
 interface SidebarProps {
@@ -31,6 +32,7 @@ export const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
     { icon: FileText, label: "Input Nilai", path: "/scores", color: "bg-teal-500" },
     { icon: BarChart3, label: "Rekap Nilai", path: "/reports", color: "bg-red-500" },
     { icon: Database, label: "Data", path: "/data", color: "bg-gray-500" },
+    { icon: HelpCircle, label: "Cara Penggunaan", path: "/guide", color: "bg-yellow-500" },
   ];
 
   return (
