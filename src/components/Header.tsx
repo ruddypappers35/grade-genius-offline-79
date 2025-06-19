@@ -35,7 +35,7 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
         
         <div className="flex items-center space-x-2 sm:space-x-4">
           <button className="p-2 rounded-xl hover:bg-primary/10 transition-colors duration-200 relative">
-            <Bell size={18} sm:size={20} className="text-foreground" />
+            <Bell size={18} className="text-foreground sm:w-5 sm:h-5" />
             <span className="absolute -top-1 -right-1 bg-gradient-to-r from-pink-500 to-purple-500 text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs font-medium">
               3
             </span>
