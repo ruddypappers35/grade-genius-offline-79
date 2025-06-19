@@ -117,7 +117,7 @@ export const ScoreReport = () => {
     ];
     
     // Header row
-    const headerRow = ['Nama', 'NIS'];
+    const headerRow = ['No', 'Nama', 'NIS'];
     categories.forEach(category => {
       subjects.forEach(subject => {
         const categorySubjectAssessments = assessments[category.id]?.[subject.id] || [];
@@ -131,8 +131,8 @@ export const ScoreReport = () => {
     data.push(headerRow);
 
     // Data rows
-    reports.forEach(report => {
-      const row = [report.name, report.nis];
+    reports.forEach((report, index) => {
+      const row = [index + 1, report.name, report.nis];
       categories.forEach(category => {
         subjects.forEach(subject => {
           const categorySubjectAssessments = assessments[category.id]?.[subject.id] || [];
@@ -196,7 +196,7 @@ export const ScoreReport = () => {
         <Card className="bg-white border border-gray-200 shadow-sm">
           <CardHeader>
             <CardTitle className="text-gray-900">
-              Laporan Nilai - {classes.find(c => c.id === selectedClass)?.name}
+              Laporan Nilai - {classes.find(c => c.id === selectedClass)?.name} ({reports.length} siswa)
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -204,6 +204,7 @@ export const ScoreReport = () => {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-200">
+                    <th className="text-left py-3 px-4 text-gray-900 font-semibold">No</th>
                     <th className="text-left py-3 px-4 text-gray-900 font-semibold">Nama</th>
                     <th className="text-left py-3 px-4 text-gray-900 font-semibold">NIS</th>
                     {categories.map(category => 
@@ -227,8 +228,9 @@ export const ScoreReport = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {reports.map((report) => (
+                  {reports.map((report, index) => (
                     <tr key={report.id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="py-3 px-4 text-gray-600 font-medium">{index + 1}</td>
                       <td className="py-3 px-4 text-gray-900 font-medium">{report.name}</td>
                       <td className="py-3 px-4 text-gray-600">{report.nis}</td>
                       {categories.map(category => 

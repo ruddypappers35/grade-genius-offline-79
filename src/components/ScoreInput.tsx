@@ -357,7 +357,7 @@ export const ScoreInput = () => {
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle className="text-gray-900">
-                Input Nilai - {classes.find(c => c.id === selectedClass)?.name} - {subjects.find(s => s.id === selectedSubject)?.name} - {categories.find(c => c.id === selectedCategory)?.name} - {selectedAssessment}
+                Input Nilai - {classes.find(c => c.id === selectedClass)?.name} - {subjects.find(s => s.id === selectedSubject)?.name} - {categories.find(c => c.id === selectedCategory)?.name} - {selectedAssessment} ({filteredStudents.length} siswa)
               </CardTitle>
               {hasUnsavedChanges && (
                 <Button
@@ -372,16 +372,19 @@ export const ScoreInput = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {filteredStudents.map((student) => {
+              {filteredStudents.map((student, index) => {
                 const key = `${student.id}-${selectedCategory}-${selectedSubject}-${selectedAssessment}`;
                 const currentValue = scoreInputs[key] ?? getExistingScore(student.id, selectedCategory, selectedSubject, selectedAssessment);
                 const hasUnsavedChanges = scoreInputs[key] !== undefined;
                 
                 return (
                   <div key={student.id} className="flex items-center justify-between p-4 rounded-lg bg-gray-50 border border-gray-200">
-                    <div>
-                      <h3 className="text-gray-900 font-medium">{student.name}</h3>
-                      <p className="text-gray-600 text-sm">NIS: {student.nis}</p>
+                    <div className="flex items-center space-x-4">
+                      <span className="text-gray-500 font-medium text-sm w-8">{index + 1}.</span>
+                      <div>
+                        <h3 className="text-gray-900 font-medium">{student.name}</h3>
+                        <p className="text-gray-600 text-sm">NIS: {student.nis}</p>
+                      </div>
                     </div>
                     <div className="flex items-center space-x-3">
                       <Input

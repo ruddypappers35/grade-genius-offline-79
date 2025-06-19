@@ -1,10 +1,12 @@
+
 import { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, User, Download, Upload } from "lucide-react";
+import { Plus, Edit, Trash2, User, Download, Upload, Search } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import * as XLSX from 'xlsx';
 
@@ -27,6 +29,8 @@ export const StudentManagement = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({ name: "", nis: "", classId: "" });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterClass, setFilterClass] = useState<string>("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -44,6 +48,15 @@ export const StudentManagement = () => {
     
     setStudents(studentsWithClass);
     setClasses(savedClasses);
+  };
+
+  const getFilteredStudents = () => {
+    return students.filter(student => {
+      const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           student.nis.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesClass = !filterClass || student.classId === filterClass;
+      return matchesSearch && matchesClass;
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -210,6 +223,8 @@ export const StudentManagement = () => {
     event.target.value = '';
   };
 
+  const filteredStudents = getFilteredStudents();
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -323,13 +338,53 @@ export const StudentManagement = () => {
 
       <Card className="bg-white border border-gray-200 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-gray-900">Daftar Siswa</CardTitle>
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-gray-900">
+              Daftar Siswa ({filteredStudents.length} siswa)
+            </CardTitle>
+          </div>
         </CardHeader>
         <CardContent>
-          {students.length > 0 ? (
+          {/* Filter and Search */}
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <div className="flex-1">
+              <Label htmlFor="search" className="text-gray-700 text-sm font-medium mb-2 block">
+                Cari Siswa
+              </Label>
+              <div className="relative">
+                <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <Input
+                  id="search"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Cari berdasarkan nama atau NIS..."
+                  className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 pl-10"
+                />
+              </div>
+            </div>
+            <div className="sm:w-64">
+              <Label htmlFor="filterClass" className="text-gray-700 text-sm font-medium mb-2 block">
+                Filter Kelas
+              </Label>
+              <Select value={filterClass} onValueChange={setFilterClass}>
+                <SelectTrigger className="bg-white border-gray-300 text-gray-900">
+                  <SelectValue placeholder="Semua kelas" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-gray-300">
+                  <SelectItem value="" className="text-gray-900">Semua kelas</SelectItem>
+                  {classes.map((cls) => (
+                    <SelectItem key={cls.id} value={cls.id} className="text-gray-900">{cls.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {filteredStudents.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="text-gray-900 w-16">No</TableHead>
                   <TableHead className="text-gray-900">Nama</TableHead>
                   <TableHead className="text-gray-900">NIS</TableHead>
                   <TableHead className="text-gray-900">Kelas</TableHead>
@@ -337,8 +392,9 @@ export const StudentManagement = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {students.map((student) => (
+                {filteredStudents.map((student, index) => (
                   <TableRow key={student.id}>
+                    <TableCell className="text-gray-600 font-medium">{index + 1}</TableCell>
                     <TableCell className="text-gray-900 font-medium">{student.name}</TableCell>
                     <TableCell className="text-gray-600">{student.nis}</TableCell>
                     <TableCell className="text-gray-600">{student.className}</TableCell>
@@ -369,7 +425,9 @@ export const StudentManagement = () => {
           ) : (
             <div className="text-center py-12">
               <User size={48} className="mx-auto text-gray-400 mb-4" />
-              <p className="text-gray-600">Belum ada siswa. Tambah siswa pertama Anda!</p>
+              <p className="text-gray-600">
+                {searchTerm || filterClass ? 'Tidak ada siswa yang sesuai dengan filter' : 'Belum ada siswa. Tambah siswa pertama Anda!'}
+              </p>
             </div>
           )}
         </CardContent>
