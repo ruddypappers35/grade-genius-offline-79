@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { GraduationCap, Users, Tag, BarChart, BookOpen, Download } from "lucide-react";
+import { GraduationCap, Users, Tag, BarChart, BookOpen, Download, Wifi, WifiOff } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -14,6 +14,7 @@ export const Dashboard = () => {
 
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstallButton, setShowInstallButton] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
 
   useEffect(() => {
     // Load stats from localStorage
@@ -42,9 +43,14 @@ export const Dashboard = () => {
       setShowInstallButton(true);
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    // Online/offline status handlers
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
 
-    // Check if app is already installed
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
     const isInWebAppiOS = (window.navigator as any).standalone === true;
     
@@ -54,6 +60,8 @@ export const Dashboard = () => {
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
     };
   }, []);
 
@@ -126,6 +134,20 @@ export const Dashboard = () => {
           <p className="text-gray-600 text-sm sm:text-base">
             Selamat datang di sistem manajemen nilai siswa
           </p>
+          {/* Offline indicator */}
+          <div className="flex items-center space-x-2 mt-2">
+            {isOnline ? (
+              <div className="flex items-center space-x-1 text-green-600">
+                <Wifi size={14} />
+                <span className="text-xs">Online</span>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-1 text-orange-600">
+                <WifiOff size={14} />
+                <span className="text-xs">Mode Offline</span>
+              </div>
+            )}
+          </div>
         </div>
         
         {showInstallButton && (
@@ -207,6 +229,12 @@ export const Dashboard = () => {
                 <span className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   <span className="text-green-600 font-medium">Aktif</span>
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600">Mode</span>
+                <span className={`font-medium ${isOnline ? 'text-green-600' : 'text-orange-600'}`}>
+                  {isOnline ? 'Online' : 'Offline'}
                 </span>
               </div>
               <div className="flex items-center justify-between text-sm">

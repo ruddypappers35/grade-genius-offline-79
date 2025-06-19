@@ -2,12 +2,13 @@
 {
   "name": "Sistem Manajemen Nilai Siswa",
   "short_name": "Sistem Nilai",
-  "description": "Aplikasi untuk mengelola nilai siswa secara efisien",
+  "description": "Aplikasi untuk mengelola nilai siswa secara efisien - dapat digunakan offline",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#3b82f6",
   "orientation": "portrait-primary",
+  "scope": "/",
   "icons": [
     {
       "src": "/placeholder.svg",
@@ -23,5 +24,7 @@
     }
   ],
   "categories": ["education", "productivity"],
-  "lang": "id"
+  "lang": "id",
+  "offline_enabled": true,
+  "prefer_related_applications": false
 }
