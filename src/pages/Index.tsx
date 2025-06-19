@@ -17,14 +17,14 @@ const Index = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-foreground flex flex-col">
       <div className="flex flex-1">
         <Sidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
         
         <div className="flex-1 min-h-screen flex flex-col">
           <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
           
-          <main className="p-6 flex-1">
+          <main className="p-3 sm:p-6 flex-1">
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/classes" element={<ClassManagement />} />
@@ -38,9 +38,9 @@ const Index = () => {
             </Routes>
           </main>
           
-          <footer className="mt-auto p-4 border-t border-white/10 text-center">
-            <p className="text-gray-400 text-sm">
-              Developed by <span className="text-white font-medium">Rudy Susanto</span>
+          <footer className="mt-auto p-4 border-t border-border/50 text-center">
+            <p className="text-muted-foreground text-sm">
+              Developed by <span className="text-primary font-medium">Rudy Susanto</span>
             </p>
           </footer>
         </div>

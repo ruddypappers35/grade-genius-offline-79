@@ -38,59 +38,127 @@ export const Dashboard = () => {
       title: "Total Kelas",
       value: stats.totalClasses,
       icon: GraduationCap,
-      color: "from-blue-500 to-cyan-500"
+      gradient: "fresh-gradient-blue",
+      description: "Kelas aktif"
     },
     {
       title: "Total Siswa",
       value: stats.totalStudents,
       icon: Users,
-      color: "from-purple-500 to-pink-500"
+      gradient: "fresh-gradient-purple",
+      description: "Siswa terdaftar"
     },
     {
       title: "Mata Pelajaran",
       value: stats.totalSubjects,
       icon: BookOpen,
-      color: "from-indigo-500 to-blue-500"
+      gradient: "fresh-gradient-green",
+      description: "Mata pelajaran"
     },
     {
       title: "Kategori Nilai",
       value: stats.totalCategories,
       icon: Tag,
-      color: "from-green-500 to-emerald-500"
+      gradient: "fresh-gradient-orange",
+      description: "Kategori penilaian"
     },
     {
       title: "Rata-rata Nilai",
       value: stats.averageScore,
       icon: BarChart,
-      color: "from-orange-500 to-red-500"
+      gradient: "fresh-gradient-blue",
+      description: "Rata-rata keseluruhan"
     }
   ];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+    <div className="space-y-6 max-w-7xl mx-auto">
+      <div className="text-center sm:text-left">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 text-gradient">
           Dashboard
         </h1>
-        <p className="text-gray-400">Selamat datang di sistem manajemen nilai siswa</p>
+        <p className="text-muted-foreground text-sm sm:text-base">
+          Selamat datang di sistem manajemen nilai siswa
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
         {statCards.map((card, index) => (
-          <Card key={index} className="bg-black/20 backdrop-blur-lg border-white/10 hover:border-white/20 transition-all duration-300 group">
+          <Card key={index} className="glass-card hover:shadow-xl transition-all duration-300 group border-0">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-300">
-                {card.title}
-              </CardTitle>
-              <div className={`p-2 rounded-lg bg-gradient-to-r ${card.color} group-hover:scale-110 transition-transform`}>
-                <card.icon className="h-4 w-4 text-white" />
+              <div className="space-y-1">
+                <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
+                  {card.title}
+                </CardTitle>
+                <div className="text-xl sm:text-2xl font-bold text-foreground">{card.value}</div>
+              </div>
+              <div className={`p-2.5 sm:p-3 rounded-xl ${card.gradient} group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                <card.icon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">{card.value}</div>
+            <CardContent className="pt-0">
+              <p className="text-xs text-muted-foreground">{card.description}</p>
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="glass-card border-0">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-foreground flex items-center space-x-2">
+              <div className="w-6 h-6 fresh-gradient-purple rounded-lg flex items-center justify-center">
+                <BarChart size={14} className="text-white" />
+              </div>
+              <span>Statistik Sistem</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="text-sm text-muted-foreground">
+              Sistem telah mencatat {stats.totalClasses} kelas dengan {stats.totalStudents} siswa aktif.
+              Terdapat {stats.totalSubjects} mata pelajaran dan {stats.totalCategories} kategori penilaian.
+            </div>
+            <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+              <span className="text-sm text-muted-foreground">Rata-rata nilai keseluruhan</span>
+              <span className={`font-bold px-3 py-1 rounded-full text-sm ${
+                stats.averageScore >= 80 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                stats.averageScore >= 70 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+              }`}>
+                {stats.averageScore}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card border-0">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-foreground flex items-center space-x-2">
+              <div className="w-6 h-6 fresh-gradient-green rounded-lg flex items-center justify-center">
+                <Users size={14} className="text-white" />
+              </div>
+              <span>Informasi Sistem</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="text-sm text-muted-foreground">
+              Sistem manajemen nilai yang membantu pengelolaan data akademik siswa dengan mudah dan efisien.
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Status Sistem</span>
+                <span className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-green-600 dark:text-green-400 font-medium">Aktif</span>
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Versi</span>
+                <span className="text-foreground font-medium">v1.0.0</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
