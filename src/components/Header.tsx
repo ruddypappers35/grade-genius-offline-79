@@ -28,7 +28,7 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
           
           <div className="block sm:hidden">
             <h2 className="text-base font-semibold text-gray-900">
-              Sistem Nilai
+              Sumatif App
             </h2>
           </div>
         </div>
