@@ -12,7 +12,7 @@ interface StudentReport {
   nis: string;
   scores: { [categoryId: string]: { [subjectId: string]: { [assessmentName: string]: number } } };
   categoryAverages: { [categoryId: string]: { [subjectId: string]: number } };
-  weightedAverage: number;
+  subjectFinalAverages: { [subjectId: string]: number };
 }
 
 export const ScoreReport = () => {
@@ -58,8 +58,7 @@ export const ScoreReport = () => {
     const studentReports: StudentReport[] = classStudents.map((student: any) => {
       const studentScores: { [categoryId: string]: { [subjectId: string]: { [assessmentName: string]: number } } } = {};
       const categoryAverages: { [categoryId: string]: { [subjectId: string]: number } } = {};
-      let weightedSum = 0;
-      let totalWeight = 0;
+      const subjectFinalAverages: { [subjectId: string]: number } = {};
 
       categories.forEach(category => {
         studentScores[category.id] = {};
@@ -85,17 +84,30 @@ export const ScoreReport = () => {
 
             const categorySubjectAverage = categorySubjectCount > 0 ? Math.round(categorySubjectSum / categorySubjectCount) : 0;
             categoryAverages[category.id][subject.id] = categorySubjectAverage;
-
-            const weight = weights.find((w: any) => w.categoryId === category.id);
-            if (weight) {
-              weightedSum += categorySubjectAverage * (weight.weight / 100);
-              totalWeight += weight.weight;
-            }
           }
         });
       });
 
-      const weightedAverage = totalWeight > 0 ? Math.round(weightedSum / (totalWeight / 100)) : 0;
+      // Calculate final average per subject (weighted by category)
+      const filteredSubjects = selectedSubject === "all" ? subjects : subjects.filter(s => s.id === selectedSubject);
+      
+      filteredSubjects.forEach(subject => {
+        let weightedSum = 0;
+        let totalWeight = 0;
+
+        categories.forEach(category => {
+          const categoryAverage = categoryAverages[category.id]?.[subject.id];
+          if (categoryAverage !== undefined) {
+            const weight = weights.find((w: any) => w.categoryId === category.id);
+            if (weight) {
+              weightedSum += categoryAverage * (weight.weight / 100);
+              totalWeight += weight.weight;
+            }
+          }
+        });
+
+        subjectFinalAverages[subject.id] = totalWeight > 0 ? Math.round(weightedSum / (totalWeight / 100)) : 0;
+      });
 
       return {
         id: student.id,
@@ -103,7 +115,7 @@ export const ScoreReport = () => {
         nis: student.nis,
         scores: studentScores,
         categoryAverages,
-        weightedAverage
+        subjectFinalAverages
       };
     });
 
@@ -134,9 +146,10 @@ export const ScoreReport = () => {
       });
     });
     
-    if (selectedSubject === "all") {
-      headerRow.push('Rata-rata Berbobot');
-    }
+    // Add final average columns for each subject
+    filteredSubjects.forEach(subject => {
+      headerRow.push(`Nilai Akhir ${subject.name}`);
+    });
     
     data.push(headerRow);
 
@@ -155,9 +168,11 @@ export const ScoreReport = () => {
         });
       });
       
-      if (selectedSubject === "all") {
-        row.push(report.weightedAverage.toString());
-      }
+      // Add final averages for each subject
+      filteredSubjects.forEach(subject => {
+        const finalAvg = report.subjectFinalAverages[subject.id];
+        row.push(finalAvg !== undefined ? finalAvg.toString() : '-');
+      });
       
       data.push(row);
     });
@@ -266,9 +281,11 @@ export const ScoreReport = () => {
                         </th>
                       ))
                     )}
-                    {selectedSubject === "all" && (
-                      <th className="text-center py-3 px-4 text-gray-900 font-bold">Rata-rata</th>
-                    )}
+                    {filteredSubjects.map(subject => (
+                      <th key={`final-${subject.id}`} className="text-center py-3 px-4 text-gray-900 font-bold">
+                        Nilai Akhir<br/>{subject.name}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
@@ -294,17 +311,17 @@ export const ScoreReport = () => {
                           </td>
                         ))
                       )}
-                      {selectedSubject === "all" && (
-                        <td className="py-3 px-4 text-center font-bold">
+                      {filteredSubjects.map(subject => (
+                        <td key={`final-${subject.id}`} className="py-3 px-4 text-center font-bold">
                           <span className={`px-2 py-1 rounded ${
-                            report.weightedAverage >= 80 ? 'bg-green-100 text-green-800' :
-                            report.weightedAverage >= 70 ? 'bg-yellow-100 text-yellow-800' :
+                            report.subjectFinalAverages[subject.id] >= 80 ? 'bg-green-100 text-green-800' :
+                            report.subjectFinalAverages[subject.id] >= 70 ? 'bg-yellow-100 text-yellow-800' :
                             'bg-red-100 text-red-800'
                           }`}>
-                            {report.weightedAverage}
+                            {report.subjectFinalAverages[subject.id] || '-'}
                           </span>
                         </td>
-                      )}
+                      ))}
                     </tr>
                   ))}
                 </tbody>
