@@ -59,7 +59,7 @@ export const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
               <GraduationCap size={18} className="text-white" />
             </div>
             <h2 className="text-lg sm:text-xl font-bold text-gray-900">
-              Sistem Nilai
+              Sumatif App
             </h2>
           </div>
           <button
