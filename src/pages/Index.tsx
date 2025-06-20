@@ -12,6 +12,7 @@ import { ScoreInput } from "@/components/ScoreInput";
 import { ScoreReport } from "@/components/ScoreReport";
 import { DataManagement } from "@/components/DataManagement";
 import { UserGuide } from "@/components/UserGuide";
+import NotFound from "./NotFound";
 import { useState } from "react";
 
 const Index = () => {
@@ -37,15 +38,15 @@ const Index = () => {
               <Route path="/reports" element={<ScoreReport />} />
               <Route path="/data" element={<DataManagement />} />
               <Route path="/guide" element={<UserGuide />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
           
           <footer className="mt-auto p-4 border-t border-gray-200 text-center bg-white">
-  <p className="text-gray-600 text-sm">
-    Developed with <span className="text-lg">☕</span> by <span className="text-gray-900 font-medium">Rudy Susanto</span>
-  </p>
-</footer>
-
+            <p className="text-gray-600 text-sm">
+              Developed with <span className="text-lg">☕</span> by <span className="text-gray-900 font-medium">Rudy Susanto</span>
+            </p>
+          </footer>
         </div>
       </div>
     </div>
