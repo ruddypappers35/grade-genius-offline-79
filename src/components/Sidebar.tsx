@@ -13,7 +13,8 @@ import {
   BookOpen,
   Menu,
   X,
-  HelpCircle
+  HelpCircle,
+  NotebookPen
 } from "lucide-react";
 
 interface SidebarProps {
@@ -55,8 +56,9 @@ export const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
       `}>
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center shadow-sm">
-              <GraduationCap size={18} className="text-white" />
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-sm relative">
+              <NotebookPen size={16} className="text-white" />
+              <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-green-500 rounded-full"></div>
             </div>
             <h2 className="text-lg sm:text-xl font-bold text-gray-900">
               Sumatif App
