@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { GraduationCap, Users, Tag, BarChart, BookOpen, Download, Wifi, WifiOff } from "lucide-react";
+import { GraduationCap, Users, Tag, BarChart, BookOpen, Download, Wifi, WifiOff, LogOut } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { UpdateButton } from "@/components/UpdateButton";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 export const Dashboard = () => {
+  const { user, logout } = useAuth();
   const [stats, setStats] = useState({
     totalClasses: 0,
     totalStudents: 0,
@@ -87,6 +90,13 @@ export const Dashboard = () => {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    toast.success("Logout berhasil!", {
+      description: "Anda telah keluar dari aplikasi."
+    });
+  };
+
   const statCards = [
     {
       title: "Total Kelas",
@@ -133,7 +143,10 @@ export const Dashboard = () => {
             Dashboard
           </h1>
           <p className="text-gray-600 text-sm sm:text-base">
-            Selamat datang di sistem manajemen nilai siswa
+            Selamat datang, <span className="font-semibold text-blue-600">{user?.fullName}</span>
+          </p>
+          <p className="text-gray-500 text-xs sm:text-sm">
+            {user?.institution} • Sistem manajemen nilai siswa
           </p>
           {/* Offline indicator */}
           <div className="flex items-center space-x-2 mt-2">
@@ -163,6 +176,15 @@ export const Dashboard = () => {
               <span>Instal Aplikasi</span>
             </Button>
           )}
+          
+          <Button
+            onClick={handleLogout}
+            variant="outline"
+            className="flex items-center space-x-2 text-red-600 border-red-600 hover:bg-red-50"
+          >
+            <LogOut size={16} />
+            <span>Logout</span>
+          </Button>
         </div>
       </div>
 
@@ -221,16 +243,24 @@ export const Dashboard = () => {
               <div className="w-6 h-6 bg-green-500 rounded-lg flex items-center justify-center">
                 <Users size={14} className="text-white" />
               </div>
-              <span>Informasi Sistem</span>
+              <span>Informasi Pengguna</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="text-sm text-gray-600">
-              Sistem manajemen nilai yang membantu pengelolaan data akademik siswa dengan mudah dan efisien.
+              Pengguna: <span className="font-medium text-gray-900">{user?.fullName}</span>
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600">Status Sistem</span>
+                <span className="text-gray-600">Username</span>
+                <span className="text-gray-900 font-medium">{user?.username}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600">Instansi</span>
+                <span className="text-gray-900 font-medium">{user?.institution}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600">Status</span>
                 <span className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   <span className="text-green-600 font-medium">Aktif</span>
@@ -241,10 +271,6 @@ export const Dashboard = () => {
                 <span className={`font-medium ${isOnline ? 'text-green-600' : 'text-orange-600'}`}>
                   {isOnline ? 'Online' : 'Offline'}
                 </span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600">Versi</span>
-                <span className="text-gray-900 font-medium">v1.0.0</span>
               </div>
             </div>
           </CardContent>
