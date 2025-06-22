@@ -78,7 +78,7 @@ export const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200 p-4">
         <div className="max-w-md mx-auto text-center">
-          <h1 className="text-2xl font-bold text-gray-900">Grade Genius</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Sumatif App</h1>
           <p className="text-gray-600 text-sm mt-1">Sistem Manajemen Nilai Siswa</p>
         </div>
       </header>
@@ -94,7 +94,7 @@ export const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
               Login
             </CardTitle>
             <p className="text-gray-600 text-sm">
-              Masuk ke akun Grade Genius Anda
+              Masuk ke akun Anda
             </p>
           </CardHeader>
           
