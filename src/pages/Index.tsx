@@ -10,6 +10,8 @@ import { CategoryManagement } from "@/components/CategoryManagement";
 import { WeightManagement } from "@/components/WeightManagement";
 import { ScoreInput } from "@/components/ScoreInput";
 import { ScoreReport } from "@/components/ScoreReport";
+import { AttendanceInput } from "@/components/AttendanceInput";
+import { AttendanceReport } from "@/components/AttendanceReport";
 import { DataManagement } from "@/components/DataManagement";
 import { UserGuide } from "@/components/UserGuide";
 import NotFound from "./NotFound";
@@ -36,6 +38,8 @@ const Index = () => {
               <Route path="/weights" element={<WeightManagement />} />
               <Route path="/scores" element={<ScoreInput />} />
               <Route path="/reports" element={<ScoreReport />} />
+              <Route path="/attendance" element={<AttendanceInput />} />
+              <Route path="/attendance-report" element={<AttendanceReport />} />
               <Route path="/data" element={<DataManagement />} />
               <Route path="/guide" element={<UserGuide />} />
               <Route path="*" element={<NotFound />} />

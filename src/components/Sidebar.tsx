@@ -14,7 +14,9 @@ import {
   Menu,
   X,
   HelpCircle,
-  NotebookPen
+  NotebookPen,
+  UserCheck,
+  ClipboardList
 } from "lucide-react";
 
 interface SidebarProps {
@@ -32,6 +34,8 @@ export const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
     { icon: Scale, label: "Bobot", path: "/weights", color: "bg-indigo-500" },
     { icon: FileText, label: "Input Nilai", path: "/scores", color: "bg-teal-500" },
     { icon: BarChart3, label: "Rekap Nilai", path: "/reports", color: "bg-red-500" },
+    { icon: UserCheck, label: "Input Kehadiran", path: "/attendance", color: "bg-cyan-500" },
+    { icon: ClipboardList, label: "Rekap Kehadiran", path: "/attendance-report", color: "bg-pink-500" },
     { icon: Database, label: "Data", path: "/data", color: "bg-gray-500" },
     { icon: HelpCircle, label: "Cara Penggunaan", path: "/guide", color: "bg-yellow-500" },
   ];
