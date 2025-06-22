@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { GraduationCap, Users, Tag, BarChart, BookOpen, Download, Wifi, WifiOff } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { UpdateButton } from "@/components/UpdateButton";
 
 export const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -150,15 +151,19 @@ export const Dashboard = () => {
           </div>
         </div>
         
-        {showInstallButton && (
-          <Button
-            onClick={handleInstallClick}
-            className="bg-blue-500 hover:bg-blue-600 text-white flex items-center space-x-2"
-          >
-            <Download size={16} />
-            <span>Instal Aplikasi</span>
-          </Button>
-        )}
+        <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-3">
+          <UpdateButton />
+          
+          {showInstallButton && (
+            <Button
+              onClick={handleInstallClick}
+              className="bg-blue-500 hover:bg-blue-600 text-white flex items-center space-x-2"
+            >
+              <Download size={16} />
+              <span>Instal Aplikasi</span>
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
