@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from "react";
-import { Calendar, BarChart3, Users, Download, Filter } from "lucide-react";
+import { Calendar, BarChart3, Users, Download, Filter, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -10,6 +9,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { cn } from "@/lib/utils";
+import jsPDF from 'jspdf';
+// @ts-ignore
+import autoTable from 'jspdf-autotable';
 
 interface AttendanceRecord {
   id: string;
@@ -163,6 +165,44 @@ export const AttendanceReport = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const exportToPDF = () => {
+    if (attendanceSummary.length === 0) return;
+
+    const doc = new jsPDF();
+    
+    // Title
+    doc.setFontSize(16);
+    doc.text('Rekap Kehadiran Siswa', 14, 15);
+    
+    // Subtitle
+    doc.setFontSize(12);
+    const className = classes.find(c => c.id === selectedClass)?.name || '';
+    const subjectName = subjects.find(s => s.id === selectedSubject)?.name || '';
+    doc.text(`Kelas: ${className} - Mata Pelajaran: ${subjectName}`, 14, 25);
+    doc.text(`Periode: ${format(startDate, "dd/MM/yyyy")} - ${format(endDate, "dd/MM/yyyy")}`, 14, 32);
+    
+    // Table
+    const tableData = attendanceSummary.map(row => [
+      row.studentName,
+      row.hadir.toString(),
+      row.sakit.toString(),
+      row.ijin.toString(),
+      row.alfa.toString(),
+      row.total.toString(),
+      `${row.percentage.toFixed(1)}%`
+    ]);
+
+    autoTable(doc, {
+      head: [['Nama Siswa', 'Hadir', 'Sakit', 'Ijin', 'Alfa', 'Total', 'Persentase']],
+      body: tableData,
+      startY: 40,
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [59, 130, 246] },
+    });
+
+    doc.save(`rekap-kehadiran-${format(new Date(), 'yyyy-MM-dd')}.pdf`);
   };
 
   const totalStats = attendanceSummary.reduce((acc, curr) => ({
@@ -363,10 +403,16 @@ export const AttendanceReport = () => {
                   Persentase Kehadiran Keseluruhan: <span className={cn("font-semibold", getPercentageColor(overallPercentage))}>{overallPercentage.toFixed(1)}%</span>
                 </p>
               </div>
-              <Button onClick={exportToCSV} className="bg-blue-600 hover:bg-blue-700 text-white">
-                <Download size={16} className="mr-2" />
-                Export CSV
-              </Button>
+              <div className="flex gap-2">
+                <Button onClick={exportToCSV} variant="outline" className="text-blue-600 border-blue-600 hover:bg-blue-50">
+                  <Download size={16} className="mr-2" />
+                  Export CSV
+                </Button>
+                <Button onClick={exportToPDF} className="bg-red-600 hover:bg-red-700 text-white">
+                  <FileText size={16} className="mr-2" />
+                  Export PDF
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent>

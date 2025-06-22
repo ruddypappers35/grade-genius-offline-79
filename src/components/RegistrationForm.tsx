@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -84,7 +83,7 @@ export const RegistrationForm = ({ onRegistrationSuccess }: RegistrationFormProp
 
   const sendRegistrationEmail = async (data: RegistrationData) => {
     const emailData = {
-      to: 'rudyfisika55@gmail.com',
+      to: 'rudyfisika@gmail.com',
       subject: 'Pendaftaran Baru - Sumatif App',
       message: `
         Pendaftaran baru telah dilakukan:
@@ -97,7 +96,7 @@ export const RegistrationForm = ({ onRegistrationSuccess }: RegistrationFormProp
       `
     };
 
-    console.log('Registration data sent:', emailData);
+    console.log('Registration data sent to rudyfisika@gmail.com:', emailData);
     // In a real application, this would send to an actual email service
   };
 
