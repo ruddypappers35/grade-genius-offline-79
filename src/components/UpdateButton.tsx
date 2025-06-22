@@ -9,28 +9,46 @@ export const UpdateButton = () => {
   const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
-    // Check for updates when component mounts
+    // Listen for service worker update events
+    const handleUpdateAvailable = () => {
+      setIsUpdateAvailable(true);
+      toast.info("Pembaruan tersedia!", {
+        description: "Klik tombol update untuk menerapkan pembaruan terbaru."
+      });
+    };
+
+    const handleUpdateComplete = () => {
+      toast.success("Aplikasi telah diperbarui!", {
+        description: "Semua pembaruan telah diterapkan."
+      });
+      setIsUpdateAvailable(false);
+      setIsUpdating(false);
+    };
+
+    // Listen for custom events from service worker
+    window.addEventListener('sw-update-available', handleUpdateAvailable);
+    window.addEventListener('sw-updated', handleUpdateComplete);
+
+    // Auto-check for updates on component mount
     checkForUpdates();
     
-    // Set up interval to check for updates every 5 minutes
-    const interval = setInterval(checkForUpdates, 5 * 60 * 1000);
+    // Set up interval to check for updates every 10 minutes
+    const interval = setInterval(checkForUpdates, 10 * 60 * 1000);
     
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('sw-update-available', handleUpdateAvailable);
+      window.removeEventListener('sw-updated', handleUpdateComplete);
+    };
   }, []);
 
   const checkForUpdates = async () => {
     try {
-      // Simple cache-busting check by comparing current timestamp with cached version
-      const currentVersion = localStorage.getItem('app_version');
-      const serverVersion = Date.now().toString();
-      
-      if (currentVersion && currentVersion !== serverVersion) {
-        setIsUpdateAvailable(true);
-      }
-      
-      // Store current version for next check
-      if (!currentVersion) {
-        localStorage.setItem('app_version', serverVersion);
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        const registration = await navigator.serviceWorker.getRegistration();
+        if (registration) {
+          registration.update();
+        }
       }
     } catch (error) {
       console.log('Update check failed:', error);
@@ -41,34 +59,25 @@ export const UpdateButton = () => {
     setIsUpdating(true);
     
     try {
-      // Clear all caches
       if ('serviceWorker' in navigator) {
-        const registrations = await navigator.serviceWorker.getRegistrations();
-        for (const registration of registrations) {
-          await registration.unregister();
+        const registration = await navigator.serviceWorker.getRegistration();
+        
+        if (registration && registration.waiting) {
+          // Tell the waiting service worker to skip waiting
+          registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+          
+          // Wait for the new service worker to take control
+          navigator.serviceWorker.addEventListener('controllerchange', () => {
+            window.location.reload();
+          });
+        } else {
+          // Fallback: force refresh
+          window.location.reload();
         }
-      }
-      
-      // Clear application cache
-      if ('caches' in window) {
-        const cacheNames = await caches.keys();
-        await Promise.all(
-          cacheNames.map(cacheName => caches.delete(cacheName))
-        );
-      }
-      
-      // Clear localStorage version to force refresh
-      localStorage.removeItem('app_version');
-      
-      // Show success message
-      toast.success("Aplikasi berhasil diperbarui!", {
-        description: "Halaman akan dimuat ulang untuk menerapkan pembaruan."
-      });
-      
-      // Reload the page after a short delay
-      setTimeout(() => {
+      } else {
+        // Fallback for browsers without service worker support
         window.location.reload();
-      }, 1500);
+      }
       
     } catch (error) {
       console.error('Update failed:', error);
@@ -81,13 +90,20 @@ export const UpdateButton = () => {
 
   const handleManualRefresh = () => {
     setIsUpdating(true);
-    toast.info("Memuat ulang aplikasi...", {
-      description: "Memeriksa pembaruan terbaru."
+    toast.info("Memeriksa pembaruan...", {
+      description: "Mencari pembaruan terbaru dari server."
     });
     
+    checkForUpdates();
+    
     setTimeout(() => {
-      window.location.reload();
-    }, 1000);
+      setIsUpdating(false);
+      if (!isUpdateAvailable) {
+        toast.success("Aplikasi sudah versi terbaru!", {
+          description: "Tidak ada pembaruan yang tersedia saat ini."
+        });
+      }
+    }, 2000);
   };
 
   return (
@@ -117,7 +133,7 @@ export const UpdateButton = () => {
           ) : (
             <RefreshCw size={16} />
           )}
-          <span>{isUpdating ? "Memuat..." : "Periksa Update"}</span>
+          <span>{isUpdating ? "Memeriksa..." : "Periksa Update"}</span>
         </Button>
       )}
     </div>
