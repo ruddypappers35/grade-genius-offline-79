@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -83,8 +84,8 @@ export const RegistrationForm = ({ onRegistrationSuccess }: RegistrationFormProp
 
   const sendRegistrationEmail = async (data: RegistrationData) => {
     const emailData = {
-      to: 'rudyfisika@gmail.com',
-      subject: 'Pendaftaran Baru - Sumatif App',
+      to: 'rudyfisika55@gmail.com',
+      subject: 'Pendaftaran Baru - Grade Genius',
       message: `
         Pendaftaran baru telah dilakukan:
         
@@ -96,7 +97,7 @@ export const RegistrationForm = ({ onRegistrationSuccess }: RegistrationFormProp
       `
     };
 
-    console.log('Registration data sent to rudyfisika@gmail.com:', emailData);
+    console.log('Registration data sent:', emailData);
     // In a real application, this would send to an actual email service
   };
 
@@ -105,7 +106,7 @@ export const RegistrationForm = ({ onRegistrationSuccess }: RegistrationFormProp
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200 p-4">
         <div className="max-w-md mx-auto text-center">
-          <h1 className="text-2xl font-bold text-gray-900">Sumatif App</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Grade Genius</h1>
           <p className="text-gray-600 text-sm mt-1">Sistem Manajemen Nilai Siswa</p>
         </div>
       </header>
@@ -121,7 +122,7 @@ export const RegistrationForm = ({ onRegistrationSuccess }: RegistrationFormProp
               Pendaftaran Aplikasi
             </CardTitle>
             <p className="text-gray-600 text-sm">
-              Daftar untuk menggunakan Sumatif App
+              Daftar untuk menggunakan Grade Genius
             </p>
           </CardHeader>
           
