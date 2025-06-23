@@ -146,7 +146,7 @@ export const Dashboard = () => {
             Selamat datang, <span className="font-semibold text-blue-600">{user?.fullName}</span>
           </p>
           <p className="text-gray-500 text-xs sm:text-sm">
-            {user?.institution} • Sistem manajemen nilai siswa
+            {user?.institution} • Sistem manajemen nilai
           </p>
           {/* Offline indicator */}
           <div className="flex items-center space-x-2 mt-2">
