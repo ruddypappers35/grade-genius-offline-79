@@ -13,8 +13,13 @@ export const UpdateButton = () => {
     const handleUpdateAvailable = () => {
       setIsUpdateAvailable(true);
       toast.info("Pembaruan tersedia!", {
-        description: "Klik tombol update untuk menerapkan pembaruan terbaru."
+        description: "Aplikasi akan diperbarui secara otomatis."
       });
+      
+      // Auto-update after 2 seconds
+      setTimeout(() => {
+        handleUpdate();
+      }, 2000);
     };
 
     const handleUpdateComplete = () => {
@@ -32,8 +37,8 @@ export const UpdateButton = () => {
     // Auto-check for updates on component mount
     checkForUpdates();
     
-    // Set up interval to check for updates every 10 minutes
-    const interval = setInterval(checkForUpdates, 10 * 60 * 1000);
+    // Set up interval to check for updates every 30 seconds
+    const interval = setInterval(checkForUpdates, 30 * 1000);
     
     return () => {
       clearInterval(interval);
@@ -47,7 +52,7 @@ export const UpdateButton = () => {
       if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
         const registration = await navigator.serviceWorker.getRegistration();
         if (registration) {
-          registration.update();
+          await registration.update();
         }
       }
     } catch (error) {
@@ -62,14 +67,19 @@ export const UpdateButton = () => {
       if ('serviceWorker' in navigator) {
         const registration = await navigator.serviceWorker.getRegistration();
         
-        if (registration && registration.waiting) {
-          // Tell the waiting service worker to skip waiting
-          registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+        if (registration) {
+          // Force update by clearing cache and updating
+          if (registration.waiting) {
+            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+          } else {
+            registration.waiting?.postMessage({ type: 'FORCE_UPDATE' });
+            await registration.update();
+          }
           
-          // Wait for the new service worker to take control
-          navigator.serviceWorker.addEventListener('controllerchange', () => {
+          // Wait a bit then reload
+          setTimeout(() => {
             window.location.reload();
-          });
+          }, 1000);
         } else {
           // Fallback: force refresh
           window.location.reload();
@@ -82,9 +92,11 @@ export const UpdateButton = () => {
     } catch (error) {
       console.error('Update failed:', error);
       toast.error("Gagal memperbarui aplikasi", {
-        description: "Silakan coba lagi atau muat ulang halaman secara manual."
+        description: "Memuat ulang halaman..."
       });
-      setIsUpdating(false);
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     }
   };
 
@@ -94,16 +106,21 @@ export const UpdateButton = () => {
       description: "Mencari pembaruan terbaru dari server."
     });
     
-    checkForUpdates();
-    
-    setTimeout(() => {
-      setIsUpdating(false);
-      if (!isUpdateAvailable) {
-        toast.success("Aplikasi sudah versi terbaru!", {
-          description: "Tidak ada pembaruan yang tersedia saat ini."
-        });
-      }
-    }, 2000);
+    // Clear cache and force reload
+    if ('caches' in window) {
+      caches.keys().then(cacheNames => {
+        return Promise.all(
+          cacheNames.map(cacheName => caches.delete(cacheName))
+        );
+      }).then(() => {
+        window.location.reload();
+      });
+    } else {
+      checkForUpdates();
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    }
   };
 
   return (
@@ -119,7 +136,7 @@ export const UpdateButton = () => {
           ) : (
             <Download size={16} />
           )}
-          <span>{isUpdating ? "Memperbarui..." : "Update Tersedia"}</span>
+          <span>{isUpdating ? "Memperbarui..." : "Update Otomatis"}</span>
         </Button>
       ) : (
         <Button
@@ -133,7 +150,7 @@ export const UpdateButton = () => {
           ) : (
             <RefreshCw size={16} />
           )}
-          <span>{isUpdating ? "Memeriksa..." : "Periksa Update"}</span>
+          <span>{isUpdating ? "Memperbarui..." : "Refresh App"}</span>
         </Button>
       )}
     </div>

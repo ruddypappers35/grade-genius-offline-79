@@ -1,16 +1,15 @@
 
-const CACHE_NAME = 'grade-genius-v2';
+const CACHE_NAME = 'grade-genius-v' + Date.now(); // Use timestamp for unique cache
+const STATIC_CACHE = 'static-v1';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/manifest.json',
-  '/src/main.tsx',
-  '/src/App.tsx',
-  '/src/index.css'
+  '/manifest.json'
 ];
 
-// Install event - cache resources
+// Install event - cache resources and activate immediately
 self.addEventListener('install', (event) => {
+  console.log('Service Worker installing...');
   // Skip waiting to activate new service worker immediately
   self.skipWaiting();
   
@@ -23,52 +22,79 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Fetch event - serve from cache when offline
+// Fetch event - network first strategy for development
 self.addEventListener('fetch', (event) => {
+  // Skip chrome extension requests
+  if (event.request.url.startsWith('chrome-extension://')) {
+    return;
+  }
+
+  // For HTML files, always fetch from network first
+  if (event.request.destination === 'document') {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          // Clone and cache the response
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME)
+            .then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+          return response;
+        })
+        .catch(() => {
+          // Fallback to cache if network fails
+          return caches.match(event.request) || caches.match('/');
+        })
+    );
+    return;
+  }
+
+  // For other resources, try network first, then cache
   event.respondWith(
-    caches.match(event.request)
+    fetch(event.request)
       .then((response) => {
-        // Cache hit - return response
-        if (response) {
+        // Check if we received a valid response
+        if (!response || response.status !== 200 || response.type !== 'basic') {
           return response;
         }
 
-        return fetch(event.request).then(
-          (response) => {
-            // Check if we received a valid response
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-
-            // Clone the response
-            const responseToCache = response.clone();
-
-            caches.open(CACHE_NAME)
-              .then((cache) => {
-                cache.put(event.request, responseToCache);
-              });
-
-            return response;
-          }
-        );
-      }).catch(() => {
-        // If both cache and network fail, show offline page
-        if (event.request.destination === 'document') {
-          return caches.match('/');
+        // Don't cache if it's a hot reload or development request
+        if (event.request.url.includes('/@vite/') || 
+            event.request.url.includes('node_modules') ||
+            event.request.url.includes('.js?v=') ||
+            event.request.url.includes('.css?v=')) {
+          return response;
         }
+
+        // Clone the response
+        const responseToCache = response.clone();
+        caches.open(CACHE_NAME)
+          .then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
+
+        return response;
+      })
+      .catch(() => {
+        // Fallback to cache
+        return caches.match(event.request);
       })
   );
 });
 
-// Activate event - clean up old caches and claim clients
+// Activate event - clean up old caches and claim clients immediately
 self.addEventListener('activate', (event) => {
+  console.log('Service Worker activating...');
+  
   event.waitUntil(
     Promise.all([
       // Clean up old caches
       caches.keys().then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
-            if (cacheName !== CACHE_NAME) {
+            if (cacheName !== CACHE_NAME && cacheName !== STATIC_CACHE) {
+              console.log('Deleting old cache:', cacheName);
               return caches.delete(cacheName);
             }
           })
@@ -79,11 +105,13 @@ self.addEventListener('activate', (event) => {
     ])
   );
   
-  // Notify all clients that update is available
-  self.clients.matchAll().then(clients => {
+  // Force refresh all clients when new SW is activated
+  self.clients.matchAll({ type: 'window' }).then(clients => {
     clients.forEach(client => {
+      console.log('Notifying client of update');
       client.postMessage({
-        type: 'SW_UPDATED'
+        type: 'SW_ACTIVATED',
+        action: 'RELOAD'
       });
     });
   });
@@ -93,5 +121,25 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
+  }
+  
+  if (event.data && event.data.type === 'FORCE_UPDATE') {
+    // Clear all caches and force update
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => caches.delete(cacheName))
+      );
+    }).then(() => {
+      self.skipWaiting();
+    });
+  }
+});
+
+// Periodic update check
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'background-sync') {
+    event.waitUntil(
+      self.registration.update()
+    );
   }
 });
