@@ -64,7 +64,7 @@ export const RegistrationForm = ({ onRegistrationSuccess }: RegistrationFormProp
       localStorage.setItem('registeredUser', JSON.stringify(userData));
       localStorage.setItem('isRegistered', 'true');
 
-      // Kirim email notification
+      // Kirim email notification ke rudyfisika@gmail.com
       await sendRegistrationEmail(data);
 
       toast.success("Pendaftaran berhasil!", {
@@ -84,7 +84,7 @@ export const RegistrationForm = ({ onRegistrationSuccess }: RegistrationFormProp
 
   const sendRegistrationEmail = async (data: RegistrationData) => {
     const emailData = {
-      to: 'rudyfisika55@gmail.com',
+      to: 'rudyfisika@gmail.com',
       subject: 'Pendaftaran Baru - Sumatif App',
       message: `
         Pendaftaran baru telah dilakukan:
@@ -97,7 +97,7 @@ export const RegistrationForm = ({ onRegistrationSuccess }: RegistrationFormProp
       `
     };
 
-    console.log('Registration data sent:', emailData);
+    console.log('Registration data sent to rudyfisika@gmail.com:', emailData);
     // In a real application, this would send to an actual email service
   };
 
