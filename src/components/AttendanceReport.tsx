@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Calendar, BarChart3, Users, Download, Filter, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -174,27 +175,27 @@ export const AttendanceReport = () => {
     
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.width;
-    const leftMargin = 20;
-    const rightMargin = 20;
+    const leftMargin = 15;
+    const rightMargin = 15;
     const contentWidth = pageWidth - leftMargin - rightMargin;
     
     // Set font
     doc.setFont('helvetica');
     
     // Title
-    doc.setFontSize(16);
+    doc.setFontSize(14);
     doc.text('REKAP KEHADIRAN SISWA', pageWidth / 2, 20, { align: 'center' });
     
     // Class and subject info
-    doc.setFontSize(12);
-    doc.text(`Kelas: ${selectedClassName}`, leftMargin, 35);
-    doc.text(`Mata Pelajaran: ${selectedSubjectName}`, leftMargin, 45);
-    doc.text(`Periode: ${format(startDate, "dd/MM/yyyy")} - ${format(endDate, "dd/MM/yyyy")}`, leftMargin, 55);
-    doc.text(`Persentase Kehadiran Keseluruhan: ${overallPercentage.toFixed(1)}%`, leftMargin, 65);
+    doc.setFontSize(10);
+    doc.text(`Kelas: ${selectedClassName}`, leftMargin, 32);
+    doc.text(`Mata Pelajaran: ${selectedSubjectName}`, leftMargin, 40);
+    doc.text(`Periode: ${format(startDate, "dd/MM/yyyy")} - ${format(endDate, "dd/MM/yyyy")}`, leftMargin, 48);
+    doc.text(`Persentase Kehadiran Keseluruhan: ${overallPercentage.toFixed(1)}%`, leftMargin, 56);
     
     // Summary statistics
-    doc.setFontSize(10);
-    doc.text(`Total Hadir: ${totalStats.hadir} | Total Sakit: ${totalStats.sakit} | Total Ijin: ${totalStats.ijin} | Total Alfa: ${totalStats.alfa}`, leftMargin, 75);
+    doc.setFontSize(9);
+    doc.text(`Total Hadir: ${totalStats.hadir} | Total Sakit: ${totalStats.sakit} | Total Ijin: ${totalStats.ijin} | Total Alfa: ${totalStats.alfa}`, leftMargin, 64);
     
     // Table data
     const tableData = attendanceSummary.map((student, index) => [
@@ -208,31 +209,32 @@ export const AttendanceReport = () => {
       `${student.percentage.toFixed(1)}%`
     ]);
     
-    // Create table with proper margins
+    // Create table with optimized layout
     autoTable(doc, {
-      head: [['No', 'Nama Siswa', 'Hadir', 'Sakit', 'Ijin', 'Alfa', 'Total', 'Persentase']],
+      head: [['No', 'Nama Siswa', 'Hadir', 'Sakit', 'Ijin', 'Alfa', 'Total', '%']],
       body: tableData,
-      startY: 85,
+      startY: 72,
       margin: { left: leftMargin, right: rightMargin },
       tableWidth: contentWidth,
       styles: {
-        fontSize: 8,
-        cellPadding: 3,
+        fontSize: 7,
+        cellPadding: 2,
       },
       headStyles: {
         fillColor: [59, 130, 246],
         textColor: 255,
-        fontStyle: 'bold'
+        fontStyle: 'bold',
+        fontSize: 7
       },
       columnStyles: {
-        0: { cellWidth: 15, halign: 'center' },
-        1: { cellWidth: 60 },
-        2: { cellWidth: 20, halign: 'center' },
-        3: { cellWidth: 20, halign: 'center' },
-        4: { cellWidth: 20, halign: 'center' },
-        5: { cellWidth: 20, halign: 'center' },
-        6: { cellWidth: 20, halign: 'center' },
-        7: { cellWidth: 25, halign: 'center' }
+        0: { cellWidth: 12, halign: 'center' },
+        1: { cellWidth: 'auto', minCellWidth: 40 },
+        2: { cellWidth: 15, halign: 'center' },
+        3: { cellWidth: 15, halign: 'center' },
+        4: { cellWidth: 15, halign: 'center' },
+        5: { cellWidth: 15, halign: 'center' },
+        6: { cellWidth: 15, halign: 'center' },
+        7: { cellWidth: 20, halign: 'center' }
       },
       didParseCell: function(data) {
         // Color percentage cells based on value
@@ -256,9 +258,9 @@ export const AttendanceReport = () => {
     });
     
     // Footer
-    const finalY = (doc as any).lastAutoTable.finalY || 85;
-    doc.setFontSize(8);
-    doc.text(`Dicetak pada: ${format(new Date(), 'dd/MM/yyyy HH:mm:ss')}`, leftMargin, finalY + 20);
+    const finalY = (doc as any).lastAutoTable.finalY || 72;
+    doc.setFontSize(7);
+    doc.text(`Dicetak pada: ${format(new Date(), 'dd/MM/yyyy HH:mm:ss')}`, leftMargin, finalY + 15);
     
     // Save the PDF
     const fileName = `rekap-kehadiran-${selectedClassName.replace(/\s+/g, '_')}-${format(new Date(), 'yyyy-MM-dd')}.pdf`;
