@@ -173,24 +173,28 @@ export const AttendanceReport = () => {
     const selectedSubjectName = subjects.find(s => s.id === selectedSubject)?.name || 'Unknown';
     
     const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.width;
+    const leftMargin = 20;
+    const rightMargin = 20;
+    const contentWidth = pageWidth - leftMargin - rightMargin;
     
     // Set font
     doc.setFont('helvetica');
     
     // Title
     doc.setFontSize(16);
-    doc.text('REKAP KEHADIRAN SISWA', 105, 20, { align: 'center' });
+    doc.text('REKAP KEHADIRAN SISWA', pageWidth / 2, 20, { align: 'center' });
     
     // Class and subject info
     doc.setFontSize(12);
-    doc.text(`Kelas: ${selectedClassName}`, 20, 35);
-    doc.text(`Mata Pelajaran: ${selectedSubjectName}`, 20, 45);
-    doc.text(`Periode: ${format(startDate, "dd/MM/yyyy")} - ${format(endDate, "dd/MM/yyyy")}`, 20, 55);
-    doc.text(`Persentase Kehadiran Keseluruhan: ${overallPercentage.toFixed(1)}%`, 20, 65);
+    doc.text(`Kelas: ${selectedClassName}`, leftMargin, 35);
+    doc.text(`Mata Pelajaran: ${selectedSubjectName}`, leftMargin, 45);
+    doc.text(`Periode: ${format(startDate, "dd/MM/yyyy")} - ${format(endDate, "dd/MM/yyyy")}`, leftMargin, 55);
+    doc.text(`Persentase Kehadiran Keseluruhan: ${overallPercentage.toFixed(1)}%`, leftMargin, 65);
     
     // Summary statistics
     doc.setFontSize(10);
-    doc.text(`Total Hadir: ${totalStats.hadir} | Total Sakit: ${totalStats.sakit} | Total Ijin: ${totalStats.ijin} | Total Alfa: ${totalStats.alfa}`, 20, 75);
+    doc.text(`Total Hadir: ${totalStats.hadir} | Total Sakit: ${totalStats.sakit} | Total Ijin: ${totalStats.ijin} | Total Alfa: ${totalStats.alfa}`, leftMargin, 75);
     
     // Table data
     const tableData = attendanceSummary.map((student, index) => [
@@ -204,11 +208,13 @@ export const AttendanceReport = () => {
       `${student.percentage.toFixed(1)}%`
     ]);
     
-    // Create table
+    // Create table with proper margins
     autoTable(doc, {
       head: [['No', 'Nama Siswa', 'Hadir', 'Sakit', 'Ijin', 'Alfa', 'Total', 'Persentase']],
       body: tableData,
       startY: 85,
+      margin: { left: leftMargin, right: rightMargin },
+      tableWidth: contentWidth,
       styles: {
         fontSize: 8,
         cellPadding: 3,
@@ -252,7 +258,7 @@ export const AttendanceReport = () => {
     // Footer
     const finalY = (doc as any).lastAutoTable.finalY || 85;
     doc.setFontSize(8);
-    doc.text(`Dicetak pada: ${format(new Date(), 'dd/MM/yyyy HH:mm:ss')}`, 20, finalY + 20);
+    doc.text(`Dicetak pada: ${format(new Date(), 'dd/MM/yyyy HH:mm:ss')}`, leftMargin, finalY + 20);
     
     // Save the PDF
     const fileName = `rekap-kehadiran-${selectedClassName.replace(/\s+/g, '_')}-${format(new Date(), 'yyyy-MM-dd')}.pdf`;
