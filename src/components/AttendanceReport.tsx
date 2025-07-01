@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Calendar, BarChart3, Users, Download, Filter } from "lucide-react";
+import { Calendar, BarChart3, Users, Download, Filter, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -9,6 +9,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { cn } from "@/lib/utils";
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 interface AttendanceRecord {
   id: string;
@@ -162,6 +164,99 @@ export const AttendanceReport = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const exportToPDF = () => {
+    if (attendanceSummary.length === 0) return;
+
+    const selectedClassName = classes.find(c => c.id === selectedClass)?.name || 'Unknown';
+    const selectedSubjectName = subjects.find(s => s.id === selectedSubject)?.name || 'Unknown';
+    
+    const doc = new jsPDF();
+    
+    // Set font
+    doc.setFont('helvetica');
+    
+    // Title
+    doc.setFontSize(16);
+    doc.text('REKAP KEHADIRAN SISWA', 105, 20, { align: 'center' });
+    
+    // Class and subject info
+    doc.setFontSize(12);
+    doc.text(`Kelas: ${selectedClassName}`, 20, 35);
+    doc.text(`Mata Pelajaran: ${selectedSubjectName}`, 20, 45);
+    doc.text(`Periode: ${format(startDate, "dd/MM/yyyy")} - ${format(endDate, "dd/MM/yyyy")}`, 20, 55);
+    doc.text(`Persentase Kehadiran Keseluruhan: ${overallPercentage.toFixed(1)}%`, 20, 65);
+    
+    // Summary statistics
+    doc.setFontSize(10);
+    doc.text(`Total Hadir: ${totalStats.hadir} | Total Sakit: ${totalStats.sakit} | Total Ijin: ${totalStats.ijin} | Total Alfa: ${totalStats.alfa}`, 20, 75);
+    
+    // Table data
+    const tableData = attendanceSummary.map((student, index) => [
+      (index + 1).toString(),
+      student.studentName,
+      student.hadir.toString(),
+      student.sakit.toString(),
+      student.ijin.toString(),
+      student.alfa.toString(),
+      student.total.toString(),
+      `${student.percentage.toFixed(1)}%`
+    ]);
+    
+    // Create table
+    autoTable(doc, {
+      head: [['No', 'Nama Siswa', 'Hadir', 'Sakit', 'Ijin', 'Alfa', 'Total', 'Persentase']],
+      body: tableData,
+      startY: 85,
+      styles: {
+        fontSize: 8,
+        cellPadding: 3,
+      },
+      headStyles: {
+        fillColor: [59, 130, 246],
+        textColor: 255,
+        fontStyle: 'bold'
+      },
+      columnStyles: {
+        0: { cellWidth: 15, halign: 'center' },
+        1: { cellWidth: 60 },
+        2: { cellWidth: 20, halign: 'center' },
+        3: { cellWidth: 20, halign: 'center' },
+        4: { cellWidth: 20, halign: 'center' },
+        5: { cellWidth: 20, halign: 'center' },
+        6: { cellWidth: 20, halign: 'center' },
+        7: { cellWidth: 25, halign: 'center' }
+      },
+      didParseCell: function(data) {
+        // Color percentage cells based on value
+        if (data.column.index === 7 && data.section === 'body') {
+          const percentage = parseFloat(data.cell.text[0]);
+          if (percentage >= 90) {
+            data.cell.styles.fillColor = [220, 252, 231]; // green
+            data.cell.styles.textColor = [22, 101, 52];
+          } else if (percentage >= 75) {
+            data.cell.styles.fillColor = [254, 249, 195]; // yellow
+            data.cell.styles.textColor = [133, 77, 14];
+          } else if (percentage >= 60) {
+            data.cell.styles.fillColor = [255, 237, 213]; // orange
+            data.cell.styles.textColor = [154, 52, 18];
+          } else {
+            data.cell.styles.fillColor = [254, 226, 226]; // red
+            data.cell.styles.textColor = [153, 27, 27];
+          }
+        }
+      }
+    });
+    
+    // Footer
+    const finalY = (doc as any).lastAutoTable.finalY || 85;
+    doc.setFontSize(8);
+    doc.text(`Dicetak pada: ${format(new Date(), 'dd/MM/yyyy HH:mm:ss')}`, 20, finalY + 20);
+    
+    // Save the PDF
+    const fileName = `rekap-kehadiran-${selectedClassName.replace(/\s+/g, '_')}-${format(new Date(), 'yyyy-MM-dd')}.pdf`;
+    doc.save(fileName);
   };
 
   const totalStats = attendanceSummary.reduce((acc, curr) => ({
@@ -362,10 +457,16 @@ export const AttendanceReport = () => {
                   Persentase Kehadiran Keseluruhan: <span className={cn("font-semibold", getPercentageColor(overallPercentage))}>{overallPercentage.toFixed(1)}%</span>
                 </p>
               </div>
-              <Button onClick={exportToCSV} className="bg-blue-600 hover:bg-blue-700 text-white">
-                <Download size={16} className="mr-2" />
-                Export CSV
-              </Button>
+              <div className="flex space-x-2">
+                <Button onClick={exportToPDF} className="bg-red-600 hover:bg-red-700 text-white">
+                  <FileText size={16} className="mr-2" />
+                  Export PDF
+                </Button>
+                <Button onClick={exportToCSV} className="bg-blue-600 hover:bg-blue-700 text-white">
+                  <Download size={16} className="mr-2" />
+                  Export CSV
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
