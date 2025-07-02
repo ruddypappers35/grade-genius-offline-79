@@ -20,6 +20,7 @@ interface Schedule {
 export const ScheduleManagement = () => {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [classes, setClasses] = useState<any[]>([]);
+  const [subjects, setSubjects] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     subject: "",
@@ -36,6 +37,7 @@ export const ScheduleManagement = () => {
   useEffect(() => {
     loadSchedules();
     loadClasses();
+    loadSubjects();
   }, []);
 
   const loadSchedules = () => {
@@ -46,6 +48,11 @@ export const ScheduleManagement = () => {
   const loadClasses = () => {
     const savedClasses = JSON.parse(localStorage.getItem('classes') || '[]');
     setClasses(savedClasses);
+  };
+
+  const loadSubjects = () => {
+    const savedSubjects = JSON.parse(localStorage.getItem('subjects') || '[]');
+    setSubjects(savedSubjects);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -126,13 +133,16 @@ export const ScheduleManagement = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="subject" className="text-gray-700">Mata Pelajaran</Label>
-                <Input
-                  id="subject"
-                  value={formData.subject}
-                  onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                  placeholder="Nama mata pelajaran"
-                  className="bg-white border-gray-300 text-gray-900 placeholder-gray-500"
-                />
+                <Select value={formData.subject} onValueChange={(value) => setFormData({ ...formData, subject: value })}>
+                  <SelectTrigger className="bg-white border-gray-300">
+                    <SelectValue placeholder="Pilih mata pelajaran" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {subjects.map((subject) => (
+                      <SelectItem key={subject.id} value={subject.name}>{subject.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
