@@ -8,11 +8,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
-import { CalendarIcon, Plus, Pencil, Trash2 } from 'lucide-react';
+import { CalendarIcon, Plus, Pencil, Trash2, Download } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 interface JournalEntry {
   id: string;
@@ -39,6 +42,8 @@ export const JournalHarian = () => {
     notes: ""
   });
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     loadJournals();
@@ -135,6 +140,46 @@ export const JournalHarian = () => {
       setFormData({ ...formData, date: format(date, 'yyyy-MM-dd') });
     }
   };
+
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    
+    // Add title
+    doc.setFontSize(16);
+    doc.text('Jurnal Harian Guru', 20, 20);
+    
+    // Prepare table data
+    const tableData = journals.map(journal => [
+      format(new Date(journal.date), "dd/MM/yyyy"),
+      journal.class,
+      journal.subject,
+      journal.material,
+      journal.method || '-',
+      journal.notes || '-'
+    ]);
+    
+    // Add table
+    (doc as any).autoTable({
+      head: [['Tanggal', 'Kelas', 'Mata Pelajaran', 'Materi', 'Metode', 'Catatan']],
+      body: tableData,
+      startY: 30,
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [59, 130, 246] }
+    });
+    
+    doc.save('jurnal-harian.pdf');
+    
+    toast({
+      title: "Berhasil",
+      description: "Jurnal harian berhasil diekspor ke PDF"
+    });
+  };
+
+  // Pagination logic
+  const totalPages = Math.ceil(journals.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentJournals = journals.slice(startIndex, endIndex);
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -255,73 +300,111 @@ export const JournalHarian = () => {
         </Dialog>
       </div>
 
-      <div className="grid gap-4">
-        {journals.length === 0 ? (
-          <Card>
-            <CardContent className="text-center py-8">
+      {journals.length > 0 && (
+        <div className="flex justify-end mb-4">
+          <Button onClick={exportToPDF} className="bg-green-600 hover:bg-green-700 text-white">
+            <Download className="w-4 h-4 mr-2" />
+            Export PDF
+          </Button>
+        </div>
+      )}
+
+      <Card>
+        <CardContent className="p-0">
+          {journals.length === 0 ? (
+            <div className="text-center py-8">
               <p className="text-gray-500">Belum ada jurnal harian. Klik "Tambah Jurnal" untuk memulai.</p>
-            </CardContent>
-          </Card>
-        ) : (
-          journals.map((journal) => (
-            <Card key={journal.id} className="hover:shadow-md transition-shadow">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">
-                    {format(new Date(journal.date), "dd MMMM yyyy", { locale: id })}
-                  </CardTitle>
+            </div>
+          ) : (
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Tanggal</TableHead>
+                    <TableHead>Kelas</TableHead>
+                    <TableHead>Mata Pelajaran</TableHead>
+                    <TableHead>Materi</TableHead>
+                    <TableHead>Metode</TableHead>
+                    <TableHead>Catatan</TableHead>
+                    <TableHead className="text-right">Aksi</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {currentJournals.map((journal) => (
+                    <TableRow key={journal.id}>
+                      <TableCell>{format(new Date(journal.date), "dd MMM yyyy", { locale: id })}</TableCell>
+                      <TableCell>{journal.class}</TableCell>
+                      <TableCell>{journal.subject}</TableCell>
+                      <TableCell>{journal.material}</TableCell>
+                      <TableCell>{journal.method || '-'}</TableCell>
+                      <TableCell className="max-w-xs truncate">{journal.notes || '-'}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end space-x-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleEdit(journal)}
+                            className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleDelete(journal.id)}
+                            className="text-red-600 border-red-600 hover:bg-red-50"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between px-6 py-4 border-t">
+                  <div className="text-sm text-gray-500">
+                    Menampilkan {startIndex + 1}-{Math.min(endIndex, journals.length)} dari {journals.length} data
+                  </div>
                   <div className="flex space-x-2">
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
-                      onClick={() => handleEdit(journal)}
-                      className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                      onClick={() => setCurrentPage(currentPage - 1)}
+                      disabled={currentPage === 1}
                     >
-                      <Pencil className="w-4 h-4" />
+                      Sebelumnya
                     </Button>
-                    <Button 
-                      variant="outline" 
+                    <div className="flex items-center space-x-1">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                        <Button
+                          key={page}
+                          variant={currentPage === page ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setCurrentPage(page)}
+                          className="w-8 h-8 p-0"
+                        >
+                          {page}
+                        </Button>
+                      ))}
+                    </div>
+                    <Button
+                      variant="outline"
                       size="sm"
-                      onClick={() => handleDelete(journal.id)}
-                      className="text-red-600 border-red-600 hover:bg-red-50"
+                      onClick={() => setCurrentPage(currentPage + 1)}
+                      disabled={currentPage === totalPages}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      Selanjutnya
                     </Button>
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm font-medium text-gray-700">Kelas:</p>
-                    <p className="text-gray-900">{journal.class}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-700">Mata Pelajaran:</p>
-                    <p className="text-gray-900">{journal.subject}</p>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-700">Materi:</p>
-                  <p className="text-gray-900">{journal.material}</p>
-                </div>
-                {journal.method && (
-                  <div>
-                    <p className="text-sm font-medium text-gray-700">Metode:</p>
-                    <p className="text-gray-900">{journal.method}</p>
-                  </div>
-                )}
-                {journal.notes && (
-                  <div>
-                    <p className="text-sm font-medium text-gray-700">Catatan:</p>
-                    <p className="text-gray-900">{journal.notes}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
