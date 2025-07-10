@@ -31,6 +31,7 @@ export const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
     { icon: Users, label: "Siswa", path: "/students", color: "bg-green-500" },
     { icon: BookOpen, label: "Mata Pelajaran", path: "/subjects", color: "bg-orange-500" },
     { icon: Calendar, label: "Jadwal Pelajaran", path: "/schedule", color: "bg-emerald-500" },
+    { icon: NotebookPen, label: "Jurnal Harian", path: "/journal", color: "bg-violet-500" },
     { icon: Tag, label: "Kategori", path: "/categories", color: "bg-purple-500" },
     { icon: Scale, label: "Bobot", path: "/weights", color: "bg-indigo-500" },
     { icon: FileText, label: "Input Nilai", path: "/scores", color: "bg-teal-500" },

@@ -7,6 +7,7 @@ import { ClassManagement } from "@/components/ClassManagement";
 import { StudentManagement } from "@/components/StudentManagement";
 import { SubjectManagement } from "@/components/SubjectManagement";
 import { ScheduleManagement } from "@/components/ScheduleManagement";
+import { JournalHarian } from "@/components/JournalHarian";
 import { CategoryManagement } from "@/components/CategoryManagement";
 import { WeightManagement } from "@/components/WeightManagement";
 import { ScoreInput } from "@/components/ScoreInput";
@@ -36,6 +37,7 @@ const Index = () => {
               <Route path="/students" element={<StudentManagement />} />
               <Route path="/subjects" element={<SubjectManagement />} />
               <Route path="/schedule" element={<ScheduleManagement />} />
+              <Route path="/journal" element={<JournalHarian />} />
               <Route path="/categories" element={<CategoryManagement />} />
               <Route path="/weights" element={<WeightManagement />} />
               <Route path="/scores" element={<ScoreInput />} />
