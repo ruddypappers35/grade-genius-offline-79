@@ -15,7 +15,7 @@ import { CalendarIcon, Plus, Pencil, Trash2, Download } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 interface JournalEntry {
   id: string;
@@ -159,7 +159,7 @@ export const JournalHarian = () => {
     ]);
     
     // Add table
-    (doc as any).autoTable({
+    autoTable(doc, {
       head: [['Tanggal', 'Kelas', 'Mata Pelajaran', 'Materi', 'Metode', 'Catatan']],
       body: tableData,
       startY: 30,
